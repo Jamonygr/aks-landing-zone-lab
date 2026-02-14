@@ -1,0 +1,70 @@
+# flux-kustomization.yaml
+# Flux Kustomization for auto-syncing the k8s/apps/ directory.
+# Depends on the GitRepository source. Flux will apply all manifests in k8s/apps/.
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: lab-apps
+  namespace: flux-system
+  labels:
+    environment: lab
+spec:
+  interval: 5m
+  retryInterval: 1m
+  timeout: 3m
+  sourceRef:
+    kind: GitRepository
+    name: aks-landing-zone
+  path: ./k8s/apps
+  prune: true
+  wait: true
+  force: false
+  targetNamespace: lab-apps
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: hello-web
+      namespace: lab-apps
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: metrics-app
+      namespace: lab-apps
+---
+# Kustomization for namespaces (applied first via dependsOn)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: lab-namespaces
+  namespace: flux-system
+  labels:
+    environment: lab
+spec:
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: aks-landing-zone
+  path: ./k8s/namespaces
+  prune: true
+  wait: true
+  timeout: 2m
+---
+# Kustomization for security policies (depends on namespaces)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: lab-security
+  namespace: flux-system
+  labels:
+    environment: lab
+spec:
+  interval: 10m
+  dependsOn:
+    - name: lab-namespaces
+  sourceRef:
+    kind: GitRepository
+    name: aks-landing-zone
+  path: ./k8s/security
+  prune: true
+  wait: true
+  timeout: 2m

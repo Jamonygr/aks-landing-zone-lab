@@ -1,0 +1,43 @@
+# load-test.yaml
+# Job running the 'hey' HTTP load generator against the hello-web service.
+# Sends 10000 requests with 50 concurrent workers to trigger HPA autoscaling.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-test-hello-web
+  namespace: lab-apps
+  labels:
+    app: load-test
+    environment: lab
+    purpose: testing
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app: load-test
+        environment: lab
+    spec:
+      containers:
+        - name: hey
+          image: ricoli/hey:latest
+          args:
+            - "-n"
+            - "10000"
+            - "-c"
+            - "50"
+            - "-q"
+            - "100"
+            - "-t"
+            - "30"
+            - "http://hello-web.lab-apps.svc.cluster.local"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      restartPolicy: Never

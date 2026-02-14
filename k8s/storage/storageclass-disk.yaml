@@ -1,0 +1,22 @@
+# storageclass-disk.yaml
+# StorageClass for Azure Managed Disks with Standard_LRS and WaitForFirstConsumer binding.
+# This ensures disks are provisioned in the same availability zone as the pod.
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-disk-standard
+  labels:
+    environment: lab
+    storage-type: disk
+provisioner: disk.csi.azure.com
+parameters:
+  skuName: Standard_LRS
+  kind: Managed
+  cachingmode: ReadOnly
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+mountOptions:
+  - noatime
+  - nodiratime

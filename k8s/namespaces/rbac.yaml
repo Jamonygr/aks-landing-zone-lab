@@ -1,0 +1,33 @@
+# rbac.yaml
+# ClusterRole and ClusterRoleBinding for read-only developer access.
+# Grants read access to pods, services, deployments, and events across all namespaces.
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: read-only-dev
+  labels:
+    environment: lab
+    purpose: developer-read-access
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "pods/status", "services", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "deployments/status", "replicasets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: read-only-dev-binding
+  labels:
+    environment: lab
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: read-only-dev
+subjects:
+  - kind: Group
+    name: dev-read-only
+    apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,133 @@
+# network-policy-test.yaml
+# Two deployments (client and server) in different namespaces with NetworkPolicies.
+# Server runs in lab-apps, client runs in lab-security.
+# Default deny in lab-apps, then allow ingress only from client in lab-security.
+---
+# Server deployment in lab-apps namespace
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netpol-server
+  namespace: lab-apps
+  labels:
+    app: netpol-server
+    environment: lab
+    role: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netpol-server
+  template:
+    metadata:
+      labels:
+        app: netpol-server
+        role: server
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netpol-server
+  namespace: lab-apps
+  labels:
+    app: netpol-server
+spec:
+  type: ClusterIP
+  selector:
+    app: netpol-server
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+---
+# Client deployment in lab-security namespace
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netpol-client
+  namespace: lab-security
+  labels:
+    app: netpol-client
+    environment: lab
+    role: client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netpol-client
+  template:
+    metadata:
+      labels:
+        app: netpol-client
+        role: client
+    spec:
+      containers:
+        - name: curl
+          image: curlimages/curl:8.5.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                echo "--- $(date -u +%Y-%m-%dT%H:%M:%SZ) ---";
+                curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" http://netpol-server.lab-apps.svc.cluster.local || echo "Connection failed";
+                sleep 10;
+              done
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+---
+# Default deny all ingress in lab-apps namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: lab-apps
+  labels:
+    environment: lab
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# Allow ingress to netpol-server from lab-security namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-client-to-server
+  namespace: lab-apps
+  labels:
+    environment: lab
+spec:
+  podSelector:
+    matchLabels:
+      app: netpol-server
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              purpose: security
+          podSelector:
+            matchLabels:
+              app: netpol-client
+      ports:
+        - protocol: TCP
+          port: 80

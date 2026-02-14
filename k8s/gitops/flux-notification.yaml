@@ -1,0 +1,78 @@
+# flux-notification.yaml
+# Flux Alert and Provider for webhook notifications on deployment events.
+# Sends notifications when Flux reconciliation succeeds or fails.
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: lab-webhook
+  namespace: flux-system
+  labels:
+    environment: lab
+spec:
+  type: generic-hmac
+  address: https://hooks.example.com/flux-notifications  # Replace with your webhook URL
+  secretRef:
+    name: webhook-hmac-secret
+---
+# Optional: webhook HMAC secret for signed payloads
+apiVersion: v1
+kind: Secret
+metadata:
+  name: webhook-hmac-secret
+  namespace: flux-system
+  labels:
+    environment: lab
+type: Opaque
+stringData:
+  token: ""  # Replace with your HMAC token
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: lab-deployment-alerts
+  namespace: flux-system
+  labels:
+    environment: lab
+spec:
+  summary: "AKS Landing Zone Lab - Flux Notification"
+  providerRef:
+    name: lab-webhook
+  eventSeverity: info
+  eventSources:
+    - kind: Kustomization
+      name: lab-apps
+      namespace: flux-system
+    - kind: Kustomization
+      name: lab-namespaces
+      namespace: flux-system
+    - kind: Kustomization
+      name: lab-security
+      namespace: flux-system
+    - kind: GitRepository
+      name: aks-landing-zone
+      namespace: flux-system
+  exclusionList:
+    - "error.*lookup"
+    - "dial.*tcp"
+---
+# Alert for errors only (high severity)
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: lab-error-alerts
+  namespace: flux-system
+  labels:
+    environment: lab
+spec:
+  summary: "AKS Landing Zone Lab - Flux Error Alert"
+  providerRef:
+    name: lab-webhook
+  eventSeverity: error
+  eventSources:
+    - kind: Kustomization
+      name: "*"
+      namespace: flux-system
+    - kind: GitRepository
+      name: "*"
+      namespace: flux-system

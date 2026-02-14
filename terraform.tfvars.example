@@ -1,0 +1,9 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  Sample Variables - Copy to terraform.tfvars and fill in your values        ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+environment  = "dev"
+location     = "eastus"
+project_name = "akslab"
+owner        = "YourName"
+alert_email  = "admin@example.com"

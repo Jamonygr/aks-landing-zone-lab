@@ -1,0 +1,30 @@
+# network-delay-experiment.yaml
+# Chaos Mesh NetworkChaos experiment that adds 100ms latency to pods in lab-apps.
+# Tests application behavior under degraded network conditions.
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-delay-lab-apps
+  namespace: lab-apps
+  labels:
+    environment: lab
+    experiment: network-delay
+  annotations:
+    description: "Add 100ms network delay to lab-apps pods"
+spec:
+  action: delay
+  mode: all
+  selector:
+    namespaces:
+      - lab-apps
+    labelSelectors:
+      app: hello-web
+  delay:
+    latency: "100ms"
+    correlation: "50"
+    jitter: "25ms"
+  direction: both
+  duration: "5m"
+  scheduler:
+    cron: "@every 15m"

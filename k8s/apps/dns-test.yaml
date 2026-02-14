@@ -1,0 +1,52 @@
+# dns-test.yaml
+# Pod for testing cluster DNS resolution.
+# Runs nslookup commands against Kubernetes internal services and external domains.
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dns-test
+  namespace: lab-apps
+  labels:
+    app: dns-test
+    environment: lab
+    purpose: testing
+  annotations:
+    description: "DNS resolution test pod for verifying CoreDNS functionality"
+spec:
+  containers:
+    - name: dns-test
+      image: busybox:1.36
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          echo "=== AKS DNS Resolution Tests ===";
+          echo "";
+          echo "--- Test 1: Resolve kubernetes.default.svc.cluster.local ---";
+          nslookup kubernetes.default.svc.cluster.local;
+          echo "";
+          echo "--- Test 2: Resolve kube-dns.kube-system.svc.cluster.local ---";
+          nslookup kube-dns.kube-system.svc.cluster.local;
+          echo "";
+          echo "--- Test 3: Resolve hello-web.lab-apps.svc.cluster.local ---";
+          nslookup hello-web.lab-apps.svc.cluster.local;
+          echo "";
+          echo "--- Test 4: Resolve external domain (microsoft.com) ---";
+          nslookup microsoft.com;
+          echo "";
+          echo "--- Test 5: Resolve external domain (azure.com) ---";
+          nslookup azure.com;
+          echo "";
+          echo "--- Test 6: Check /etc/resolv.conf ---";
+          cat /etc/resolv.conf;
+          echo "";
+          echo "=== DNS Tests Complete ===";
+          sleep 3600
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+  restartPolicy: Never

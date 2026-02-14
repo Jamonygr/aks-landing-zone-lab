@@ -1,0 +1,40 @@
+# hpa-metrics-app.yaml
+# HorizontalPodAutoscaler for the metrics-app deployment using a custom metric.
+# Scales between 1 and 5 replicas based on the custom_metric pods metric.
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: metrics-app-hpa
+  namespace: lab-apps
+  labels:
+    app: metrics-app
+    environment: lab
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: metrics-app
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: custom_metric
+        target:
+          type: AverageValue
+          averageValue: "10"
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 120
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60

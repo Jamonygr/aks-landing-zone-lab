@@ -1,0 +1,95 @@
+# limit-ranges.yaml
+# Defines default, min, and max container resource limits per namespace.
+# Default: 100m CPU, 128Mi memory. Max: 500m CPU, 512Mi. Min: 50m CPU, 64Mi.
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: lab-apps-limits
+  namespace: lab-apps
+  labels:
+    environment: lab
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 100m
+        memory: 128Mi
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      max:
+        cpu: 500m
+        memory: 512Mi
+      min:
+        cpu: 50m
+        memory: 64Mi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: lab-monitoring-limits
+  namespace: lab-monitoring
+  labels:
+    environment: lab
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 100m
+        memory: 128Mi
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      max:
+        cpu: 500m
+        memory: 512Mi
+      min:
+        cpu: 50m
+        memory: 64Mi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: lab-ingress-limits
+  namespace: lab-ingress
+  labels:
+    environment: lab
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 100m
+        memory: 128Mi
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      max:
+        cpu: 500m
+        memory: 512Mi
+      min:
+        cpu: 50m
+        memory: 64Mi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: lab-security-limits
+  namespace: lab-security
+  labels:
+    environment: lab
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 100m
+        memory: 128Mi
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      max:
+        cpu: 500m
+        memory: 512Mi
+      min:
+        cpu: 50m
+        memory: 64Mi

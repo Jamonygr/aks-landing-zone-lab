@@ -1,0 +1,39 @@
+# stress-cpu.yaml
+# CPU stress test deployment using progrium/stress.
+# Generates sustained CPU load to trigger CPU alerts and test HPA behavior.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stress-cpu
+  namespace: lab-apps
+  labels:
+    app: stress-cpu
+    environment: lab
+    purpose: testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stress-cpu
+  template:
+    metadata:
+      labels:
+        app: stress-cpu
+        environment: lab
+    spec:
+      containers:
+        - name: stress
+          image: progrium/stress
+          args:
+            - "--cpu"
+            - "1"
+            - "--timeout"
+            - "300s"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi

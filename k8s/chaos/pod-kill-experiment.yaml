@@ -1,0 +1,33 @@
+# pod-kill-experiment.yaml
+# Chaos Mesh PodChaos experiment that randomly kills pods in the lab-apps namespace.
+# Tests application resilience and alerting for unexpected pod terminations.
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: pod-kill-lab-apps
+  namespace: lab-apps
+  labels:
+    environment: lab
+    experiment: pod-kill
+  annotations:
+    description: "Randomly kill pods in lab-apps to test resilience"
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - lab-apps
+    labelSelectors:
+      environment: lab
+    expressionSelectors:
+      - key: app
+        operator: NotIn
+        values:
+          - stress-cpu
+          - stress-memory
+          - crashloop-pod
+  gracePeriod: 0
+  duration: "30s"
+  scheduler:
+    cron: "@every 5m"

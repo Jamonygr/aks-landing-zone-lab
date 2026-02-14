@@ -1,0 +1,55 @@
+# namespaces.yaml
+# Creates the core namespaces for the AKS Landing Zone Lab.
+# Namespaces: lab-apps, lab-monitoring, lab-ingress, lab-security
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lab-apps
+  labels:
+    environment: lab
+    managed-by: kubectl
+    purpose: applications
+  annotations:
+    description: "Namespace for lab application workloads"
+    owner: "platform-team"
+    created-by: "aks-landing-zone-lab"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lab-monitoring
+  labels:
+    environment: lab
+    managed-by: kubectl
+    purpose: monitoring
+  annotations:
+    description: "Namespace for monitoring and observability components"
+    owner: "platform-team"
+    created-by: "aks-landing-zone-lab"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lab-ingress
+  labels:
+    environment: lab
+    managed-by: kubectl
+    purpose: ingress
+  annotations:
+    description: "Namespace for ingress controllers and related resources"
+    owner: "platform-team"
+    created-by: "aks-landing-zone-lab"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lab-security
+  labels:
+    environment: lab
+    managed-by: kubectl
+    purpose: security
+  annotations:
+    description: "Namespace for security tools and policy enforcement"
+    owner: "platform-team"
+    created-by: "aks-landing-zone-lab"

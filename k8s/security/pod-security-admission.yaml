@@ -1,0 +1,36 @@
+# pod-security-admission.yaml
+# Namespace labels for Kubernetes Pod Security Admission (PSA).
+# Applies 'restricted' policy to lab-apps and 'baseline' policy to lab-monitoring.
+# These are applied as namespace patches (use kubectl apply).
+---
+# Enforce restricted Pod Security Standard on lab-apps
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lab-apps
+  labels:
+    environment: lab
+    managed-by: kubectl
+    purpose: applications
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: latest
+---
+# Enforce baseline Pod Security Standard on lab-monitoring
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lab-monitoring
+  labels:
+    environment: lab
+    managed-by: kubectl
+    purpose: monitoring
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: latest

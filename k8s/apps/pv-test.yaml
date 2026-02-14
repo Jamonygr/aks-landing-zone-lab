@@ -1,0 +1,64 @@
+# pv-test.yaml
+# PersistentVolumeClaim (1Gi, default StorageClass) and Deployment mounting it.
+# Busybox writes timestamps to a file every 10 seconds to verify persistent storage.
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv-test-claim
+  namespace: lab-apps
+  labels:
+    app: pv-test
+    environment: lab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  # Uses the default StorageClass
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pv-test
+  namespace: lab-apps
+  labels:
+    app: pv-test
+    environment: lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pv-test
+  template:
+    metadata:
+      labels:
+        app: pv-test
+        environment: lab
+    spec:
+      containers:
+        - name: writer
+          image: busybox:1.36
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) - pv-test write from $(hostname)" >> /data/timestamps.log;
+                echo "Current log entries: $(wc -l < /data/timestamps.log)";
+                sleep 10;
+              done
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: pv-test-claim

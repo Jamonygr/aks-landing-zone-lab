@@ -1,0 +1,30 @@
+# crashloop-pod.yaml
+# Pod that intentionally exits with an error to enter CrashLoopBackOff.
+# Used to test pod restart alerts and troubleshooting workflows.
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: crashloop-pod
+  namespace: lab-apps
+  labels:
+    app: crashloop-pod
+    environment: lab
+    purpose: testing
+  annotations:
+    description: "Intentionally failing pod for alert testing"
+spec:
+  containers:
+    - name: crashloop
+      image: busybox:1.36
+      command: ["/bin/sh", "-c"]
+      args:
+        - "echo 'This pod is designed to crash for testing purposes'; exit 1"
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+  restartPolicy: Always

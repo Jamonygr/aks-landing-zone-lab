@@ -1,0 +1,90 @@
+# prometheus-scrape-config.yaml
+# ConfigMap containing additional Prometheus scrape configurations for custom app metrics.
+# Used with kube-prometheus-stack or Azure Monitor Prometheus to scrape lab-apps endpoints.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-additional-scrape-configs
+  namespace: lab-monitoring
+  labels:
+    app: prometheus
+    environment: lab
+data:
+  additional-scrape-configs.yaml: |
+    # Scrape all pods with prometheus.io annotations in lab-apps namespace
+    - job_name: 'lab-apps-pods'
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      metrics_path: /metrics
+      kubernetes_sd_configs:
+        - role: pod
+          namespaces:
+            names:
+              - lab-apps
+      relabel_configs:
+        # Only scrape pods with prometheus.io/scrape annotation
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        # Use custom metrics path if specified
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        # Use custom port if specified
+        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          target_label: __address__
+        # Add pod labels
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: pod
+
+    # Scrape all services with prometheus.io annotations
+    - job_name: 'lab-apps-services'
+      scrape_interval: 30s
+      scrape_timeout: 10s
+      kubernetes_sd_configs:
+        - role: service
+          namespaces:
+            names:
+              - lab-apps
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          target_label: __address__
+        - action: labelmap
+          regex: __meta_kubernetes_service_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          action: replace
+          target_label: service
+
+    # Explicitly scrape metrics-app
+    - job_name: 'metrics-app'
+      scrape_interval: 10s
+      metrics_path: /metrics
+      static_configs:
+        - targets: ['metrics-app.lab-apps.svc.cluster.local:8080']
+          labels:
+            app: metrics-app
+            environment: lab

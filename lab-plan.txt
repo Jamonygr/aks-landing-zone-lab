@@ -1,0 +1,377 @@
+================================================================================
+          COMPLETE AKS BEGINNER LAB - FINAL ELEMENT LIST (156 Elements)
+================================================================================
+
+Budget target : ~$80-$100/mo always-on, ~$55-$75 with stop/start scripts
+Region        : East US
+Exposure      : Public API + Public Ingress
+Network       : Hub-Spoke
+Date          : 2026-02-14
+
+================================================================================
+A. PREREQUISITES & TOOLING (7)
+================================================================================
+  1.  Azure Subscription (Contributor role)
+  2.  Azure CLI
+  3.  Terraform CLI
+  4.  kubectl
+  5.  helm
+  6.  PowerShell (Windows)
+  7.  Git
+
+================================================================================
+B. TERRAFORM FOUNDATION (7)
+================================================================================
+  8.  providers.tf - azurerm, azuread, helm, kubernetes
+  9.  versions.tf - pinned versions
+  10. backend.tf - Azure Storage remote state
+  11. variables.tf - all inputs with defaults
+  12. locals.tf - naming, tags, computed values
+  13. outputs.tf - cluster info, endpoints, kubeconfig command
+  14. envs/dev.tfvars - budget-safe defaults
+
+================================================================================
+C. HUB NETWORK (10)
+================================================================================
+  15. Hub Resource Group
+  16. Hub VNet (10.0.0.0/16)
+  17. Management Subnet
+  18. Shared Services Subnet
+  19. Firewall Subnet (AzureFirewallSubnet)
+  20. Hub NSGs (per subnet)
+  21. Hub Route Table / UDR (NAT by default, switchable to Firewall)
+  22. Azure Firewall (Basic SKU)              [OPTIONAL TOGGLE - OFF by default]
+  23. Firewall Network + App Rule Collections  [OPTIONAL TOGGLE - OFF by default]
+  24. Hub Diagnostic Settings -> Log Analytics
+
+================================================================================
+D. SPOKE NETWORK - AKS (8)
+================================================================================
+  25. Spoke Resource Group
+  26. Spoke VNet (10.1.0.0/16)
+  27. AKS System Node Pool Subnet
+  28. AKS User Node Pool Subnet
+  29. Ingress Subnet
+  30. Spoke NSGs (per subnet)
+  31. Spoke Route Table / UDR
+  32. Spoke Diagnostic Settings -> Log Analytics
+
+================================================================================
+E. VNET PEERING (2)
+================================================================================
+  33. Hub -> Spoke peering
+  34. Spoke -> Hub peering
+
+================================================================================
+F. AKS CLUSTER (8)
+================================================================================
+  35. AKS Cluster (managed identity, RBAC, Azure CNI Overlay, public API)
+  36. System Node Pool (Standard_B2s, 1-2 nodes, autoscale)
+  37. User Node Pool (Standard_B2s, 1-3 nodes, autoscale, labels/taints)
+  38. Auto-upgrade channel (patch)
+  39. Maintenance Window
+  40. OIDC Issuer + Workload Identity
+  41. Network Policy engine (Calico)
+  42. Cluster Diagnostic Settings -> Log Analytics
+
+================================================================================
+G. CONTAINER REGISTRY (3)
+================================================================================
+  43. ACR (Basic SKU)
+  44. AKS -> ACR AcrPull role assignment
+  45. ACR Diagnostic Settings -> Log Analytics
+
+================================================================================
+H. INGRESS & DNS (4)
+================================================================================
+  46. NGINX Ingress Controller (Helm)
+  47. Public Static IP for Load Balancer
+  48. Azure DNS Zone                           [OPTIONAL TOGGLE]
+  49. DNS A record                             [OPTIONAL TOGGLE]
+
+================================================================================
+I. MONITORING - PHASE 1 CORE (5)
+================================================================================
+  50. Log Analytics Workspace (30-day retention)
+  51. Container Insights add-on
+  52. AKS Diagnostic Settings (API server, controller, scheduler, autoscaler)
+  53. NSG Flow Logs -> Log Analytics
+  54. Activity Log -> Log Analytics
+
+================================================================================
+J. MONITORING - PHASE 2 ADVANCED (7)         [OPTIONAL TOGGLE]
+================================================================================
+  55. Azure Monitor Workspace (Prometheus)
+  56. Managed Prometheus data collection rule + endpoint
+  57. Prometheus scrape config (AKS defaults + custom app metrics)
+  58. Azure Managed Grafana
+  59. Grafana <-> Prometheus data source
+  60. Pre-built dashboards: cluster, nodes, pods, ingress, PV usage
+  61. Grafana -> Azure AD auth
+
+================================================================================
+K. ALERTS & ACTION GROUPS (11)
+================================================================================
+  62. Action Group (email)
+  63. Alert: Node NotReady
+  64. Alert: Node CPU > 80%
+  65. Alert: Node Memory > 80%
+  66. Alert: Pod restart count > 5 in 10 min
+  67. Alert: Failed pod count > 0
+  68. Alert: OOMKilled events (log alert)
+  69. Alert: API server 5xx (log alert)
+  70. Alert: Image pull failure (log alert)
+  71. Budget Alert: $100 threshold via Cost Management
+  72. Alert: Log Analytics daily ingestion cap
+
+================================================================================
+L. SECURITY BASELINE (6)
+================================================================================
+  73. Azure Policy Add-on (pod security baseline initiative)
+  74. Defender for Containers                  [OPTIONAL TOGGLE - OFF by default]
+  75. Key Vault + CSI Secrets Store Provider
+  76. Key Vault RBAC for AKS identity
+  77. Network Policy YAML (default-deny + allow rules)
+  78. Pod Security Admission labels (restricted/baseline per namespace)
+
+================================================================================
+M. NAMESPACES, QUOTAS & RBAC (7)
+================================================================================
+  79. lab-apps namespace
+  80. lab-monitoring namespace
+  81. lab-ingress namespace
+  82. lab-security namespace
+  83. Resource Quotas per namespace
+  84. Limit Ranges per namespace
+  85. ClusterRole / RoleBinding (read-only dev role)
+
+================================================================================
+N. TEST PODS & SAMPLE WORKLOADS (13)
+================================================================================
+  86. hello-web         - NGINX "Hello AKS" deployment + service + ingress
+  87. stress-cpu        - CPU stress pod (trigger CPU alert + HPA)
+  88. stress-memory     - Memory stress pod (trigger OOM alert)
+  89. crashloop-pod     - Intentionally crashing pod (trigger restart alert)
+  90. log-generator     - Structured JSON log emitter (test Log Analytics)
+  91. metrics-app       - App exposing /metrics (test Prometheus scraping)
+  92. pv-test           - Pod with PVC on Azure Disk (storage + PV dashboards)
+  93. multi-container   - Init container + sidecar (pod lifecycle learning)
+  94. job-example       - Job + CronJob (batch workloads)
+  95. network-policy-test - Client + server across namespaces (net policy demo)
+  96. dns-test          - Busybox pod for nslookup/dig (cluster DNS learning)
+  97. secret-consumer   - Pod reading from Key Vault CSI
+  98. config-consumer   - Pod using ConfigMap + env vars
+
+================================================================================
+O. AUTOSCALING DEMOS (4)
+================================================================================
+  99.  HPA on hello-web (CPU target 50%)
+  100. HPA on metrics-app (custom metric, Phase 2)
+  101. Cluster Autoscaler verification via load script
+  102. KEDA ScaledObject example               [OPTIONAL TOGGLE]
+
+================================================================================
+P. STORAGE (3)
+================================================================================
+  103. StorageClass - Azure Disk (Standard_LRS)
+  104. StorageClass - Azure Files              [OPTIONAL TOGGLE] (ReadWriteMany)
+  105. PVC used by pv-test
+
+================================================================================
+Q. GITOPS - FLUX V2 (4)
+================================================================================
+  106. Flux v2 installed (Helm or AKS GitOps extension)
+  107. Git source pointing to k8s/apps
+  108. Flux Kustomization for auto-sync
+  109. Flux notification controller -> webhook on deploy events
+
+================================================================================
+R. CHAOS ENGINEERING (4)
+================================================================================
+  110. Chaos Mesh installed (Helm)
+  111. Pod kill experiment
+  112. Network delay experiment
+  113. Runbook: chaos -> observe alerts -> confirm recovery
+
+================================================================================
+S. COST MANAGEMENT & FINOPS (3)
+================================================================================
+  114. Kubecost (open-source, Helm) - per-namespace cost view
+  115. Auto-shutdown script (az aks stop/start on schedule)
+  116. Tag-based cost allocation views
+
+================================================================================
+T. BACKUP & DR (3)
+================================================================================
+  117. Velero installed (Helm) - namespace backup/restore
+  118. Scheduled backup of lab-apps
+  119. DR drill exercise: delete -> restore -> verify
+
+================================================================================
+U. IDENTITY & WORKLOAD IDENTITY (2)
+================================================================================
+  120. Workload Identity Federation - pod calls Azure APIs with federated token
+  121. Managed Identity for metrics-app -> Azure Storage (real-world pattern)
+
+================================================================================
+V. ADVANCED NETWORKING EXERCISES (3)
+================================================================================
+  122. Private DNS Zone (internal discovery across hub-spoke)
+  123. Network Watcher + Connection Monitor (hub <-> spoke)
+  124. NSG Flow Log analytics dashboard
+
+================================================================================
+W. DEVELOPER EXPERIENCE (2)
+================================================================================
+  125. .devcontainer/devcontainer.json - one-click setup in VS Code / Codespaces
+  126. Bridge to Kubernetes config (debug pod locally)
+
+================================================================================
+X. GOVERNANCE & COMPLIANCE (4)
+================================================================================
+  127. Custom Azure Policy: deny pods without resource limits
+  128. Custom Azure Policy: enforce image source = your ACR only
+  129. checkov / tfsec scan config for CI
+  130. Azure Resource Graph queries (find non-compliant resources)
+
+================================================================================
+Y. OBSERVABILITY EXTRAS (3)
+================================================================================
+  131. kube-state-metrics + node-exporter (deeper Prometheus metrics, Phase 2)
+  132. SLO/SLI dashboard in Grafana (error rate, latency for hello-web)
+  133. Synthetic monitoring - App Insights test [OPTIONAL TOGGLE]
+
+================================================================================
+Z. DATA & STATEFUL WORKLOADS (2)
+================================================================================
+  134. Redis (Helm) - in-cluster caching, StatefulSet exercise
+  135. Azure Service Bus queue + KEDA autoscaler (event-driven scaling demo)
+
+================================================================================
+AA. OPERATIONAL SCRIPTS (9)
+================================================================================
+  136. scripts/bootstrap.ps1        - Install prereqs, create state backend, az login
+  137. scripts/deploy.ps1           - terraform init -> plan -> apply wrapper
+  138. scripts/destroy.ps1          - terraform destroy + orphan check
+  139. scripts/get-credentials.ps1  - Fetch kubeconfig
+  140. scripts/deploy-workloads.ps1 - Apply all K8s manifests
+  141. scripts/cleanup-workloads.ps1- Remove K8s manifests
+  142. scripts/cost-check.ps1       - Query Cost Management API
+  143. scripts/stop-lab.ps1         - az aks stop
+  144. scripts/start-lab.ps1        - az aks start
+
+================================================================================
+BB. DOCUMENTATION (9)
+================================================================================
+  145. README.md                    - Overview, Mermaid architecture diagram, quick start
+  146. docs/lab-guide.md            - Step-by-step exercises (Day 1 -> Day N)
+  147. docs/architecture.md         - Hub-spoke diagram, IP plan, traffic flows
+  148. docs/monitoring-guide.md     - KQL queries, dashboard walkthrough, alert testing
+  149. docs/troubleshooting.md      - Common errors & fixes
+  150. docs/cost-optimization.md    - Stay under budget, teardown reminders
+  151. docs/security-guide.md       - Policy, network policy testing, secrets
+  152. docs/chaos-guide.md          - Chaos experiments & recovery procedures
+  153. docs/gitops-guide.md         - Flux setup & workflow
+
+================================================================================
+CC. CI / REPO HYGIENE (3)
+================================================================================
+  154. .gitignore                   - state, .terraform/, *.tfstate*
+  155. terraform.tfvars.example     - sample variables
+  156. GitHub Actions workflow       - fmt -> validate -> plan on PR
+
+================================================================================
+OPTIONAL TOGGLES SUMMARY (all OFF by default)
+================================================================================
+
+  Toggle                                    Cost if ON
+  ----------------------------------------  ----------------
+  Azure Firewall (Basic)                    +$900/mo
+  Managed Grafana                           +$10/mo
+  Managed Prometheus                        +$0-$5/mo
+  Defender for Containers                   +$7/node/mo
+  Application Insights synthetic test       +$0-$5/mo
+  Azure DNS Zone                            +$0.50/mo
+  KEDA                                      Free
+  Azure Files StorageClass                  ~$1/mo
+
+================================================================================
+COST SUMMARY
+================================================================================
+
+  Scenario                                  Monthly Cost
+  ----------------------------------------  ----------------
+  Always-on, defaults only                  ~$80-$100
+  Stop nights & weekends                    ~$55-$75
+  All toggles ON excl. Firewall             ~$105-$130
+  All toggles ON incl. Firewall             ~$1,000+
+
+================================================================================
+FOLDER STRUCTURE
+================================================================================
+
+  AKS/
+  |-- infra/
+  |   |-- providers.tf
+  |   |-- versions.tf
+  |   |-- backend.tf
+  |   |-- variables.tf
+  |   |-- locals.tf
+  |   |-- outputs.tf
+  |   |-- envs/
+  |   |   |-- dev.tfvars
+  |   |-- modules/
+  |       |-- network-hub/
+  |       |-- network-spoke-aks/
+  |       |-- network-peering/
+  |       |-- aks/
+  |       |-- acr/
+  |       |-- ingress/
+  |       |-- monitoring-core/
+  |       |-- monitoring-advanced/
+  |       |-- alerts/
+  |       |-- security/
+  |       |-- egress-security/
+  |-- k8s/
+  |   |-- namespaces/
+  |   |-- apps/
+  |   |-- monitoring/
+  |   |-- security/
+  |   |-- autoscaling/
+  |   |-- storage/
+  |   |-- chaos/
+  |   |-- backup/
+  |   |-- gitops/
+  |-- scripts/
+  |   |-- bootstrap.ps1
+  |   |-- deploy.ps1
+  |   |-- destroy.ps1
+  |   |-- get-credentials.ps1
+  |   |-- deploy-workloads.ps1
+  |   |-- cleanup-workloads.ps1
+  |   |-- cost-check.ps1
+  |   |-- stop-lab.ps1
+  |   |-- start-lab.ps1
+  |-- docs/
+  |   |-- lab-guide.md
+  |   |-- architecture.md
+  |   |-- monitoring-guide.md
+  |   |-- troubleshooting.md
+  |   |-- cost-optimization.md
+  |   |-- security-guide.md
+  |   |-- chaos-guide.md
+  |   |-- gitops-guide.md
+  |-- .devcontainer/
+  |   |-- devcontainer.json
+  |-- .github/
+  |   |-- workflows/
+  |       |-- terraform-ci.yml
+  |-- .gitignore
+  |-- README.md
+  |-- terraform.tfvars.example
+  |-- lab-plan.txt
+
+================================================================================
+  Total elements  : 156
+  Total categories: 29
+================================================================================

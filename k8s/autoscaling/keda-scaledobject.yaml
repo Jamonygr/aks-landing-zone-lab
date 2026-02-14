@@ -1,0 +1,88 @@
+# keda-scaledobject.yaml
+# KEDA ScaledObject targeting a deployment with Azure Service Bus queue trigger.
+# Scales based on queue message count. Requires KEDA operator installed in the cluster.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: servicebus-connection
+  namespace: lab-apps
+  labels:
+    app: keda-worker
+    environment: lab
+type: Opaque
+stringData:
+  connection-string: ""  # Replace with your Azure Service Bus connection string
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: servicebus-trigger-auth
+  namespace: lab-apps
+  labels:
+    app: keda-worker
+    environment: lab
+spec:
+  secretTargetRef:
+    - parameter: connection
+      name: servicebus-connection
+      key: connection-string
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keda-worker
+  namespace: lab-apps
+  labels:
+    app: keda-worker
+    environment: lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keda-worker
+  template:
+    metadata:
+      labels:
+        app: keda-worker
+        environment: lab
+    spec:
+      containers:
+        - name: worker
+          image: busybox:1.36
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "KEDA worker started - waiting for messages...";
+              while true; do sleep 10; done
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: keda-worker-scaledobject
+  namespace: lab-apps
+  labels:
+    app: keda-worker
+    environment: lab
+spec:
+  scaleTargetRef:
+    name: keda-worker
+  pollingInterval: 15
+  cooldownPeriod: 60
+  minReplicaCount: 0
+  maxReplicaCount: 10
+  triggers:
+    - type: azure-servicebus
+      metadata:
+        queueName: lab-queue
+        messageCount: "5"
+        activationMessageCount: "1"
+      authenticationRef:
+        name: servicebus-trigger-auth

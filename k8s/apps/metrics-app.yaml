@@ -1,0 +1,113 @@
+# metrics-app.yaml
+# Nginx-based application exposing a /metrics endpoint in Prometheus format.
+# Includes Service with prometheus.io scrape annotations.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metrics-app-config
+  namespace: lab-apps
+  labels:
+    app: metrics-app
+data:
+  nginx.conf: |
+    events {}
+    http {
+      server {
+        listen 8080;
+
+        location / {
+          return 200 'Hello from metrics-app\n';
+          add_header Content-Type text/plain;
+        }
+
+        location /metrics {
+          return 200 '# HELP http_requests_total Total number of HTTP requests.\n# TYPE http_requests_total counter\nhttp_requests_total{method="get",code="200"} 1027\nhttp_requests_total{method="post",code="200"} 42\n# HELP custom_metric A custom metric for HPA testing.\n# TYPE custom_metric gauge\ncustom_metric 15\n# HELP app_memory_usage_bytes Current memory usage.\n# TYPE app_memory_usage_bytes gauge\napp_memory_usage_bytes 52428800\n# HELP app_request_duration_seconds Request duration histogram.\n# TYPE app_request_duration_seconds histogram\napp_request_duration_seconds_bucket{le="0.1"} 500\napp_request_duration_seconds_bucket{le="0.5"} 800\napp_request_duration_seconds_bucket{le="1.0"} 950\napp_request_duration_seconds_bucket{le="+Inf"} 1000\napp_request_duration_seconds_sum 320.5\napp_request_duration_seconds_count 1000\n';
+          add_header Content-Type text/plain;
+        }
+
+        location /healthz {
+          return 200 'ok\n';
+          add_header Content-Type text/plain;
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-app
+  namespace: lab-apps
+  labels:
+    app: metrics-app
+    environment: lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metrics-app
+  template:
+    metadata:
+      labels:
+        app: metrics-app
+        environment: lab
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: metrics-app-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-app
+  namespace: lab-apps
+  labels:
+    app: metrics-app
+    environment: lab
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  selector:
+    app: metrics-app
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http-metrics

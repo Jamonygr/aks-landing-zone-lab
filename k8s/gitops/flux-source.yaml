@@ -1,0 +1,25 @@
+# flux-source.yaml
+# Flux GitRepository source pointing to this repository.
+# Flux will poll the repo for changes and reconcile the cluster state.
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: aks-landing-zone
+  namespace: flux-system
+  labels:
+    environment: lab
+spec:
+  interval: 1m
+  url: https://github.com/your-org/AKS  # Replace with your repository URL
+  ref:
+    branch: main
+  secretRef:
+    name: flux-git-credentials  # Optional: only needed for private repos
+  ignore: |
+    # Exclude non-K8s files from reconciliation
+    /modules/
+    /landing-zones/
+    /environments/
+    /*.tf
+    /*.md

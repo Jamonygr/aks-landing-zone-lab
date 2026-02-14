@@ -1,0 +1,127 @@
+# config-consumer.yaml
+# ConfigMap with application configuration consumed via environment variables and volume mount.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: lab-apps
+  labels:
+    app: config-consumer
+    environment: lab
+data:
+  APP_NAME: "aks-lab-demo"
+  APP_ENV: "lab"
+  LOG_LEVEL: "info"
+  MAX_RETRIES: "3"
+  CACHE_TTL: "300"
+  API_ENDPOINT: "https://api.example.com/v1"
+  app-settings.json: |
+    {
+      "application": {
+        "name": "aks-lab-demo",
+        "version": "1.0.0",
+        "environment": "lab"
+      },
+      "logging": {
+        "level": "info",
+        "format": "json"
+      },
+      "features": {
+        "caching": true,
+        "metrics": true,
+        "tracing": false
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-consumer
+  namespace: lab-apps
+  labels:
+    app: config-consumer
+    environment: lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-consumer
+  template:
+    metadata:
+      labels:
+        app: config-consumer
+        environment: lab
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "=== Config Consumer Pod ===";
+              echo "Environment variables from ConfigMap:";
+              echo "  APP_NAME=$APP_NAME";
+              echo "  APP_ENV=$APP_ENV";
+              echo "  LOG_LEVEL=$LOG_LEVEL";
+              echo "  MAX_RETRIES=$MAX_RETRIES";
+              echo "  CACHE_TTL=$CACHE_TTL";
+              echo "  API_ENDPOINT=$API_ENDPOINT";
+              echo "";
+              echo "Config file mounted at /etc/config/:";
+              cat /etc/config/app-settings.json;
+              echo "";
+              echo "Watching for config changes...";
+              while true; do
+                sleep 30;
+                echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) - Config file hash: $(md5sum /etc/config/app-settings.json | cut -d' ' -f1)";
+              done
+          env:
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_NAME
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_ENV
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LOG_LEVEL
+            - name: MAX_RETRIES
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: MAX_RETRIES
+            - name: CACHE_TTL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: CACHE_TTL
+            - name: API_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: API_ENDPOINT
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: config-volume
+          configMap:
+            name: app-config
+            items:
+              - key: app-settings.json
+                path: app-settings.json

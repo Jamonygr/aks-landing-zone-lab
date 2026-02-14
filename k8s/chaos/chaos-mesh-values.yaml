@@ -1,0 +1,71 @@
+# chaos-mesh-values.yaml
+# Helm values for installing Chaos Mesh into the AKS cluster.
+# Install with: helm install chaos-mesh chaos-mesh/chaos-mesh -n chaos-mesh --create-namespace -f chaos-mesh-values.yaml
+---
+# Chaos Mesh controller manager configuration
+controllerManager:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Chaos Dashboard for web UI
+dashboard:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  service:
+    type: ClusterIP
+    port: 2333
+  ingress:
+    enabled: false
+  securityMode: true
+
+# Chaos Daemon runs on each node
+chaosDaemon:
+  runtime: containerd
+  socketPath: /run/containerd/containerd.sock
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# DNS server for DNS chaos experiments
+dnsServer:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Limit the namespaces Chaos Mesh can target
+controllerManager:
+  targetNamespace: lab-apps
+  allowedNamespaces: "lab-apps,lab-monitoring"
+
+# Enable Prometheus metrics
+prometheus:
+  enabled: true
+
+# RBAC settings
+rbac:
+  create: true
+
+# Timezone
+timezone: UTC

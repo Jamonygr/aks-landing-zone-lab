@@ -1,0 +1,39 @@
+# stress-memory.yaml
+# Memory stress test deployment using progrium/stress.
+# Allocates 256MB of memory to trigger memory and OOM alerts.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stress-memory
+  namespace: lab-apps
+  labels:
+    app: stress-memory
+    environment: lab
+    purpose: testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stress-memory
+  template:
+    metadata:
+      labels:
+        app: stress-memory
+        environment: lab
+    spec:
+      containers:
+        - name: stress
+          image: progrium/stress
+          args:
+            - "--vm"
+            - "1"
+            - "--vm-bytes"
+            - "256M"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi

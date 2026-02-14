@@ -1,0 +1,72 @@
+# job-example.yaml
+# Demonstrates Kubernetes Job and CronJob resources.
+# Job: calculates pi to 2000 decimal places.
+# CronJob: echoes a timestamp every 5 minutes.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi-calculation
+  namespace: lab-apps
+  labels:
+    app: pi-calculation
+    environment: lab
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  activeDeadlineSeconds: 120
+  template:
+    metadata:
+      labels:
+        app: pi-calculation
+        environment: lab
+    spec:
+      containers:
+        - name: pi
+          image: perl:5.38-slim
+          command: ["perl", "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: timestamp-logger
+  namespace: lab-apps
+  labels:
+    app: timestamp-logger
+    environment: lab
+spec:
+  schedule: "*/5 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: timestamp-logger
+            environment: lab
+        spec:
+          containers:
+            - name: logger
+              image: busybox:1.36
+              command: ["/bin/sh", "-c"]
+              args:
+                - echo "CronJob executed at $(date -u +%Y-%m-%dT%H:%M:%SZ) on $(hostname)"
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 100m
+                  memory: 128Mi
+          restartPolicy: OnFailure

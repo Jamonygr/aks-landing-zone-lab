@@ -1,0 +1,27 @@
+# storageclass-files.yaml
+# StorageClass for Azure Files with Standard_LRS and ReadWriteMany support.
+# Suitable for shared file storage across multiple pods.
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-files-standard
+  labels:
+    environment: lab
+    storage-type: files
+provisioner: file.csi.azure.com
+parameters:
+  skuName: Standard_LRS
+  protocol: smb
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+mountOptions:
+  - dir_mode=0777
+  - file_mode=0777
+  - uid=0
+  - gid=0
+  - mfsymlinks
+  - cache=strict
+  - actimeo=30
+  - nosharesock

@@ -1,0 +1,38 @@
+# velero-schedule.yaml
+# Velero Schedule for automated daily backups of the lab-apps namespace.
+# Requires Velero installed in the cluster with an Azure Blob Storage backend.
+# Install Velero: velero install --provider azure --plugins velero/velero-plugin-for-microsoft-azure --bucket <bucket> --secret-file <credentials>
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: lab-apps-daily-backup
+  namespace: velero
+  labels:
+    environment: lab
+    purpose: backup
+spec:
+  schedule: "0 2 * * *"  # Daily at 2:00 AM UTC
+  template:
+    includedNamespaces:
+      - lab-apps
+    includedResources:
+      - deployments
+      - services
+      - configmaps
+      - secrets
+      - persistentvolumeclaims
+      - persistentvolumes
+      - ingresses
+      - networkpolicies
+      - pods
+    storageLocation: default
+    volumeSnapshotLocations:
+      - default
+    ttl: 168h0m0s  # 7 days retention
+    snapshotVolumes: true
+    defaultVolumesToFsBackup: false
+    metadata:
+      labels:
+        backup-type: scheduled
+        environment: lab
