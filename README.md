@@ -1,27 +1,7 @@
 # AKS Landing Zone Lab
 
-Terraform-based AKS lab that models an Azure landing zone style platform with hub-spoke networking, security, governance, and operations tooling.
-
-## Architecture
-
-```mermaid
-graph TB
-    INTERNET((Internet))
-    HubVNet["Hub VNet (10.0.0.0/16)"]
-    SpokeVNet["Spoke VNet (10.1.0.0/16)"]
-    VNetPeering["VNet Peering"]
-    AKS["AKS Cluster"]
-    ACR["Azure Container Registry"]
-    KV["Key Vault"]
-    LAW["Log Analytics"]
-
-    HubVNet --- VNetPeering --- SpokeVNet
-    INTERNET --> AKS
-    SpokeVNet --> AKS
-    AKS --> ACR
-    AKS --> KV
-    AKS --> LAW
-```
+Terraform-based AKS lab that models an Azure landing zone style platform
+with hub-spoke networking, security, governance, and operations tooling.
 
 ## What This Deploys
 
@@ -31,11 +11,13 @@ graph TB
 - NGINX ingress with static public IP
 - Log Analytics, diagnostics, alerts, and budget controls
 - Key Vault, CSI Secrets Store driver, policy assignments
-- Optional features: Firewall, Managed Prometheus, Managed Grafana, Defender, DNS zone
+- Optional features:
+  Firewall, Managed Prometheus, Managed Grafana, Defender, DNS zone
 
 ## Prerequisites
 
-- Azure subscription with rights to create networking, AKS, RBAC, and policy resources
+- Azure subscription with rights to create networking, AKS, RBAC,
+  and policy resources
 - Azure CLI (`az`)
 - Terraform `>= 1.5`
 - kubectl
@@ -50,7 +32,7 @@ graph TB
 .\scripts\bootstrap.ps1
 ```
 
-2. Deploy infrastructure:
+1. Deploy infrastructure:
 
 ```powershell
 # dev (budget-safe)
@@ -60,7 +42,7 @@ graph TB
 .\scripts\deploy.ps1 -Environment lab
 ```
 
-3. Get kubeconfig and verify cluster access:
+1. Get kubeconfig and verify cluster access:
 
 ```powershell
 # safest: use Terraform output generated from current state
@@ -70,13 +52,13 @@ terraform output -raw kubeconfig_command
 kubectl get nodes
 ```
 
-4. Deploy Kubernetes lab workloads:
+1. Deploy Kubernetes lab workloads:
 
 ```powershell
 .\scripts\deploy-workloads.ps1
 ```
 
-5. Save costs when idle:
+1. Save costs when idle:
 
 ```powershell
 .\scripts\stop-lab.ps1 -Environment dev
@@ -84,7 +66,7 @@ kubectl get nodes
 .\scripts\cost-check.ps1 -Environment dev
 ```
 
-6. Tear down:
+1. Tear down:
 
 ```powershell
 .\scripts\cleanup-workloads.ps1 -AutoApprove
@@ -121,7 +103,8 @@ Main cost-affecting variables:
 - `enable_dns_zone`
 - `enable_azure_files`
 
-Review current defaults in `environments/dev.tfvars`, `environments/lab.tfvars`, and `environments/prod.tfvars`.
+Review current defaults in `environments/dev.tfvars`,
+`environments/lab.tfvars`, and `environments/prod.tfvars`.
 
 ## Repository Layout
 
@@ -130,9 +113,11 @@ AKS/
 |- main.tf / providers.tf / variables.tf / locals.tf / outputs.tf
 |- backend.tf
 |- environments/                 # dev, lab, prod tfvars
-|- landing-zones/               # networking, aks-platform, management, security, governance, identity
+|- landing-zones/               # networking, aks-platform, management,
+|                               # security, governance, identity
 |- modules/                     # reusable Terraform modules
-|- k8s/                         # Kubernetes manifests (apps, security, autoscaling, storage, etc.)
+|- k8s/                         # Kubernetes manifests (apps, security,
+|                               # autoscaling, storage, etc.)
 |- scripts/                     # bootstrap/deploy/destroy and ops scripts
 |- docs/                        # lab and operational documentation
 |- wiki/                        # deeper reference pages
@@ -162,7 +147,9 @@ terraform output kubeconfig_command
 
 ## Notes
 
-- Terraform validates cleanly. You may still see one provider deprecation warning related to AKS AAD block behavior under pinned `azurerm` v3.
+- Terraform validates cleanly.
+- You may still see one provider deprecation warning related to
+  AKS AAD block behavior under pinned `azurerm` v3.
 - Remote state is configured in `backend.tf` (Azure Storage backend).
 
 ## License
