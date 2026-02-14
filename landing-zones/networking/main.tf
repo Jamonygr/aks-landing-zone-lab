@@ -116,17 +116,6 @@ resource "azurerm_network_security_group" "aks_system" {
     destination_address_prefix = "*"
   }
 
-  security_rule {
-    name                       = "DenyAllInbound"
-    priority                   = 4096
-    direction                  = "Inbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
 }
 
 resource "azurerm_network_security_group" "aks_user" {
@@ -159,17 +148,6 @@ resource "azurerm_network_security_group" "aks_user" {
     destination_address_prefix = "*"
   }
 
-  security_rule {
-    name                       = "DenyAllInbound"
-    priority                   = 4096
-    direction                  = "Inbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
 }
 
 resource "azurerm_network_security_group" "ingress" {
@@ -232,11 +210,14 @@ resource "azurerm_route_table" "spoke_aks" {
   resource_group_name = azurerm_resource_group.spoke.name
   tags                = var.tags
 
-  route {
-    name                   = "to-hub"
-    address_prefix         = var.hub_vnet_cidr
-    next_hop_type          = "VirtualAppliance"
-    next_hop_in_ip_address = var.enable_firewall ? azurerm_firewall.hub[0].ip_configuration[0].private_ip_address : null
+  dynamic "route" {
+    for_each = var.enable_firewall ? [1] : []
+    content {
+      name                   = "to-hub"
+      address_prefix         = var.hub_vnet_cidr
+      next_hop_type          = "VirtualAppliance"
+      next_hop_in_ip_address = azurerm_firewall.hub[0].ip_configuration[0].private_ip_address
+    }
   }
 
   route {
@@ -360,10 +341,6 @@ resource "azurerm_monitor_diagnostic_setting" "hub_vnet" {
   target_resource_id         = azurerm_virtual_network.hub.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
-  enabled_log {
-    category = "VMProtectionAlerts"
-  }
-
   metric {
     category = "AllMetrics"
     enabled  = true
@@ -375,10 +352,6 @@ resource "azurerm_monitor_diagnostic_setting" "spoke_vnet" {
   name                       = "diag-spoke-vnet-${var.environment}"
   target_resource_id         = azurerm_virtual_network.spoke_aks.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
-
-  enabled_log {
-    category = "VMProtectionAlerts"
-  }
 
   metric {
     category = "AllMetrics"

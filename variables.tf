@@ -79,6 +79,12 @@ variable "enable_dns_zone" {
   default     = false
 }
 
+variable "enable_cluster_alerts" {
+  description = "Enable AKS cluster-specific alerts and diagnostics"
+  type        = bool
+  default     = true
+}
+
 variable "enable_keda" {
   description = "Enable KEDA for event-driven autoscaling - free"
   type        = bool
@@ -127,6 +133,11 @@ variable "system_node_pool_max" {
   description = "Maximum nodes in system pool"
   type        = number
   default     = 2
+
+  validation {
+    condition     = var.system_node_pool_max >= var.system_node_pool_min
+    error_message = "system_node_pool_max must be greater than or equal to system_node_pool_min."
+  }
 }
 
 variable "user_node_pool_min" {
@@ -139,6 +150,11 @@ variable "user_node_pool_max" {
   description = "Maximum nodes in user pool"
   type        = number
   default     = 3
+
+  validation {
+    condition     = var.user_node_pool_max >= var.user_node_pool_min
+    error_message = "user_node_pool_max must be greater than or equal to user_node_pool_min."
+  }
 }
 
 # ─── DNS ──────────────────────────────────────────────────────────────────────
@@ -147,6 +163,11 @@ variable "dns_zone_name" {
   description = "DNS zone name (required if enable_dns_zone = true)"
   type        = string
   default     = ""
+
+  validation {
+    condition     = !var.enable_dns_zone || length(trimspace(var.dns_zone_name)) > 0
+    error_message = "dns_zone_name must be set when enable_dns_zone is true."
+  }
 }
 
 # ─── Alerting ─────────────────────────────────────────────────────────────────

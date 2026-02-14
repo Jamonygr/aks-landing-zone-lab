@@ -6,7 +6,7 @@ locals {
   # ─── Naming Convention ────────────────────────────────────────────────────
   name_prefix  = "${var.project_name}-${var.environment}"
   cluster_name = "aks-${local.name_prefix}"
-  acr_name     = replace("acr${var.project_name}${var.environment}", "-", "")
+  acr_name     = lower(replace("acr${var.project_name}${var.environment}", "-", ""))
   dns_prefix   = "${var.project_name}-${var.environment}"
 
   # ─── Resource Group Names ─────────────────────────────────────────────────

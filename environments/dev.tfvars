@@ -31,7 +31,9 @@ enable_managed_prometheus = false # +$0-5/mo
 enable_managed_grafana    = false # +$10/mo
 enable_defender           = false # +$7/node/mo
 enable_dns_zone           = false # +$0.50/mo
+enable_cluster_alerts     = true  # alerts after AKS comes online
 enable_keda               = false # free
 enable_azure_files        = false # +$1/mo
 enable_app_insights       = false # +$0-5/mo
+
 

@@ -53,8 +53,8 @@ variable "acr_name" {
   type        = string
 
   validation {
-    condition     = can(regex("^[a-zA-Z0-9]{5,50}$", var.acr_name))
-    error_message = "ACR name must be 5-50 alphanumeric characters."
+    condition     = can(regex("^[a-z0-9]{5,50}$", var.acr_name))
+    error_message = "ACR name must be 5-50 lowercase alphanumeric characters."
   }
 }
 

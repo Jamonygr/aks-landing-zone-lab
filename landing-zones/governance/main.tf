@@ -13,10 +13,10 @@ terraform {
 }
 
 #--------------------------------------------------------------
-# Data Sources
-#--------------------------------------------------------------
-
-data "azurerm_subscription" "current" {}
+locals {
+  acr_registry_name       = element(reverse(split("/", var.acr_id)), 0)
+  allowed_acr_image_regex = "^${local.acr_registry_name}\\.azurecr\\.io/.+$"
+}
 
 #--------------------------------------------------------------
 # Custom Policy: Deny Pods Without Resource Limits
@@ -133,7 +133,7 @@ resource "azurerm_policy_definition" "enforce_acr_images" {
         displayName = "Allowed container image regex"
         description = "Regex pattern for allowed container image sources"
       }
-      defaultValue = "^.+\\.azurecr\\.io/.+$"
+      defaultValue = local.allowed_acr_image_regex
     }
     excludedNamespaces = {
       type = "Array"
@@ -181,7 +181,7 @@ resource "azurerm_resource_policy_assignment" "enforce_acr_images" {
       value = "Audit"
     }
     allowedContainerImagesRegex = {
-      value = "^.+\\.azurecr\\.io/.+$"
+      value = local.allowed_acr_image_regex
     }
     excludedNamespaces = {
       value = ["kube-system", "gatekeeper-system", "azure-arc", "ingress-nginx"]

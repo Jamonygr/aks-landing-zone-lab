@@ -13,15 +13,6 @@ terraform {
 }
 
 #--------------------------------------------------------------
-# Data Sources
-#--------------------------------------------------------------
-
-data "azurerm_subscription" "current" {}
-
-data "azurerm_resource_group" "identity" {
-  name = var.resource_group_name
-}
-
 #--------------------------------------------------------------
 # Resource Group for Identity Resources
 #--------------------------------------------------------------

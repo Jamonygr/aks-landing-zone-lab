@@ -50,7 +50,7 @@ module "management" {
   location                  = var.location
   tags                      = local.tags
   cluster_id                = module.aks_platform.cluster_id
-  enable_cluster_alerts     = true
+  enable_cluster_alerts     = var.enable_cluster_alerts
   enable_managed_prometheus = var.enable_managed_prometheus
   enable_managed_grafana    = var.enable_managed_grafana
   alert_email               = var.alert_email
@@ -85,12 +85,11 @@ module "governance" {
 module "identity" {
   source = "./landing-zones/identity"
 
-  environment         = var.environment
-  location            = var.location
-  tags                = local.tags
-  cluster_name        = module.aks_platform.cluster_name
-  oidc_issuer_url     = module.aks_platform.oidc_issuer_url
-  resource_group_name = module.networking.spoke_resource_group_name
+  environment     = var.environment
+  location        = var.location
+  tags            = local.tags
+  cluster_name    = module.aks_platform.cluster_name
+  oidc_issuer_url = module.aks_platform.oidc_issuer_url
 
   depends_on = [module.aks_platform]
 }

@@ -32,7 +32,10 @@ enable_managed_prometheus = true
 enable_managed_grafana    = true
 enable_defender           = true
 enable_dns_zone           = true
+dns_zone_name             = "akslab-prod.example.com"
+enable_cluster_alerts     = true
 enable_keda               = true
 enable_azure_files        = true
 enable_app_insights       = true
+
 

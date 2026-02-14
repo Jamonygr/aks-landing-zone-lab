@@ -33,11 +33,6 @@ variable "oidc_issuer_url" {
   type        = string
 }
 
-variable "resource_group_name" {
-  description = "Name of the existing resource group for data source lookup"
-  type        = string
-}
-
 variable "workload_namespace" {
   description = "Kubernetes namespace for the workload identity service account"
   type        = string
