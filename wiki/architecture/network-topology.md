@@ -37,7 +37,8 @@ graph TB
     USR --- UserPool
     FWSN --- FW
 
-    HubVNet <-->|"VNet Peering<br/>(bidirectional)"| SpokeVNet
+    HubVNet -->|"VNet Peering"| SpokeVNet
+    SpokeVNet -->|"VNet Peering"| HubVNet
 ```
 
 ### Why Hub-Spoke?

@@ -40,7 +40,8 @@ graph TB
     SYS --- SP
     USR --- UP
 
-    Hub <-->|VNet Peering| Spoke
+    Hub -->|VNet Peering| Spoke
+    Spoke -->|VNet Peering| Hub
 
     AKS --> ACR
     AKS --> KV
