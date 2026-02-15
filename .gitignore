@@ -1,5 +1,6 @@
 # Terraform working directories
 .terraform/
+.tfdata-temp/
 
 # Terraform state files
 *.tfstate
