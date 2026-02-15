@@ -341,9 +341,8 @@ resource "azurerm_monitor_diagnostic_setting" "hub_vnet" {
   target_resource_id         = azurerm_virtual_network.hub.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 
@@ -353,9 +352,8 @@ resource "azurerm_monitor_diagnostic_setting" "spoke_vnet" {
   target_resource_id         = azurerm_virtual_network.spoke_aks.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 
@@ -388,9 +386,8 @@ resource "azurerm_monitor_diagnostic_setting" "firewall" {
     category = "AzureFirewallNetworkRule"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 

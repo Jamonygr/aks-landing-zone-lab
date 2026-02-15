@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     Stop the AKS lab cluster to save costs.
@@ -9,7 +9,7 @@
     Prints estimated savings.
 
 .PARAMETER Environment
-    Target environment (dev, lab, prod). Default: dev.
+    Target environment (dev, lab, prod, staging). Default: dev.
 
 .PARAMETER ClusterName
     AKS cluster name. If omitted, derived from environment.
@@ -27,7 +27,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [ValidateSet("dev", "lab", "prod")]
+    [ValidateSet("dev", "lab", "prod", "staging")]
     [string]$Environment = "dev",
 
     [Parameter()]

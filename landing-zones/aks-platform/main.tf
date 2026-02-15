@@ -24,6 +24,8 @@ data "azurerm_resource_group" "aks" {
   name = var.resource_group_name
 }
 
+data "azurerm_client_config" "current" {}
+
 #--------------------------------------------------------------
 # AKS Cluster
 #--------------------------------------------------------------
@@ -77,7 +79,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   # RBAC & Azure AD Integration
   azure_active_directory_role_based_access_control {
     azure_rbac_enabled = true
-    tenant_id          = "da1065a7-b9e0-4bfd-bb18-bac1df30b72d"
+    tenant_id          = data.azurerm_client_config.current.tenant_id
   }
 
   # OIDC & Workload Identity
@@ -186,9 +188,8 @@ resource "azurerm_monitor_diagnostic_setting" "aks" {
     category = "guard"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 

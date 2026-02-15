@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     Destroy the AKS Landing Zone Lab infrastructure.
@@ -8,7 +8,7 @@
     resources, and prints a cleanup summary.
 
 .PARAMETER Environment
-    Target environment (dev, lab, prod). Default: dev.
+    Target environment (dev, lab, prod, staging). Default: dev.
 
 .PARAMETER AutoApprove
     Skip confirmation prompt and destroy automatically.
@@ -26,7 +26,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [ValidateSet("dev", "lab", "prod")]
+    [ValidateSet("dev", "lab", "prod", "staging")]
     [string]$Environment = "dev",
 
     [Parameter()]
@@ -51,6 +51,7 @@ function Write-Err     { param([string]$Msg) Write-Host "[ERROR]   $Msg" -Foregr
 $scriptDir  = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $rootDir    = Split-Path -Parent $scriptDir
 $tfvarsFile = Join-Path $rootDir "environments\$Environment.tfvars"
+$stateKey   = "aks-landing-zone-lab-$Environment.tfstate"
 
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Red
@@ -95,10 +96,11 @@ if (-not $AutoApprove) {
 
 Write-Host ""
 Write-Info "Running terraform destroy for '$Environment'..."
+Write-Info "Using state key: $stateKey"
 
 Push-Location $rootDir
 try {
-    terraform init -input=false 2>$null
+    terraform init -input=false -reconfigure -backend-config="key=$stateKey" 2>$null
     if ($LASTEXITCODE -ne 0) {
         Write-Err "terraform init failed."
         exit 1

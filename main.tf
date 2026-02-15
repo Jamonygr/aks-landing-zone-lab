@@ -25,7 +25,6 @@ module "aks_platform" {
   resource_group_name        = module.networking.spoke_resource_group_name
   aks_system_subnet_id       = module.networking.aks_system_subnet_id
   aks_user_subnet_id         = module.networking.aks_user_subnet_id
-  ingress_subnet_id          = module.networking.ingress_subnet_id
   log_analytics_workspace_id = module.management.log_analytics_workspace_id
   acr_name                   = local.acr_name
   cluster_name               = local.cluster_name

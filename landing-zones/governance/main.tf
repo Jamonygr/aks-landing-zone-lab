@@ -169,8 +169,8 @@ resource "azurerm_policy_definition" "enforce_acr_images" {
         kinds              = ["Pod"]
         excludedNamespaces = "[parameters('excludedNamespaces')]"
         values = {
-          imageRegex          = "[parameters('allowedContainerImagesRegex')]"
-          excludedContainers   = "[parameters('excludedContainers')]"
+          imageRegex         = "[parameters('allowedContainerImagesRegex')]"
+          excludedContainers = "[parameters('excludedContainers')]"
         }
       }
     }

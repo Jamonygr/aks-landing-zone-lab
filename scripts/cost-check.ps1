@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     Check current Azure costs for the AKS Landing Zone Lab.
@@ -9,7 +9,7 @@
     and prints a color-coded cost summary.
 
 .PARAMETER Environment
-    Target environment (dev, lab, prod). Default: dev.
+    Target environment (dev, lab, prod, staging). Default: dev.
 
 .PARAMETER BudgetAmount
     Monthly budget threshold in USD. Default: read from tfvars or 100.
@@ -30,7 +30,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [ValidateSet("dev", "lab", "prod")]
+    [ValidateSet("dev", "lab", "prod", "staging")]
     [string]$Environment = "dev",
 
     [Parameter()]

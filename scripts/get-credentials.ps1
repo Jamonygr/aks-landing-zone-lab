@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     Get AKS cluster credentials and verify connectivity.
@@ -8,7 +8,7 @@
     the kubectl connection, and prints cluster info.
 
 .PARAMETER Environment
-    Target environment (dev, lab, prod). Default: dev.
+    Target environment (dev, lab, prod, staging). Default: dev.
 
 .PARAMETER ClusterName
     AKS cluster name. If omitted, derived from environment: aks-akslab-<env>.
@@ -33,7 +33,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [ValidateSet("dev", "lab", "prod")]
+    [ValidateSet("dev", "lab", "prod", "staging")]
     [string]$Environment = "dev",
 
     [Parameter()]

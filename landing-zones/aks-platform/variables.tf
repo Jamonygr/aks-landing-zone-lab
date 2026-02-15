@@ -38,11 +38,6 @@ variable "aks_user_subnet_id" {
   type        = string
 }
 
-variable "ingress_subnet_id" {
-  description = "Subnet ID for the ingress controller"
-  type        = string
-}
-
 variable "log_analytics_workspace_id" {
   description = "Log Analytics Workspace ID for monitoring and diagnostics"
   type        = string

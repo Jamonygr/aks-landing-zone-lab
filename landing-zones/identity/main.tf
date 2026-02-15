@@ -39,12 +39,11 @@ resource "azurerm_user_assigned_identity" "workload" {
 #--------------------------------------------------------------
 
 resource "azurerm_federated_identity_credential" "workload" {
-  name                = "fic-workload-${var.cluster_name}"
-  resource_group_name = azurerm_resource_group.identity.name
-  parent_id           = azurerm_user_assigned_identity.workload.id
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = var.oidc_issuer_url
-  subject             = "system:serviceaccount:${var.workload_namespace}:${var.workload_service_account_name}"
+  name      = "fic-workload-${var.cluster_name}"
+  parent_id = azurerm_user_assigned_identity.workload.id
+  audience  = ["api://AzureADTokenExchange"]
+  issuer    = var.oidc_issuer_url
+  subject   = "system:serviceaccount:${var.workload_namespace}:${var.workload_service_account_name}"
 }
 
 #--------------------------------------------------------------
@@ -63,12 +62,11 @@ resource "azurerm_user_assigned_identity" "metrics_app" {
 #--------------------------------------------------------------
 
 resource "azurerm_federated_identity_credential" "metrics_app" {
-  name                = "fic-metrics-app-${var.cluster_name}"
-  resource_group_name = azurerm_resource_group.identity.name
-  parent_id           = azurerm_user_assigned_identity.metrics_app.id
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = var.oidc_issuer_url
-  subject             = "system:serviceaccount:${var.metrics_namespace}:${var.metrics_service_account_name}"
+  name      = "fic-metrics-app-${var.cluster_name}"
+  parent_id = azurerm_user_assigned_identity.metrics_app.id
+  audience  = ["api://AzureADTokenExchange"]
+  issuer    = var.oidc_issuer_url
+  subject   = "system:serviceaccount:${var.metrics_namespace}:${var.metrics_service_account_name}"
 }
 
 #--------------------------------------------------------------

@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     Deploy the AKS Landing Zone Lab infrastructure with Terraform.
@@ -8,7 +8,7 @@
     specified environment tfvars file. Prints Terraform outputs on success.
 
 .PARAMETER Environment
-    Target environment (dev, lab, prod). Default: dev.
+    Target environment (dev, lab, prod, staging). Default: dev.
 
 .PARAMETER AutoApprove
     Skip confirmation prompt and apply automatically.
@@ -29,7 +29,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [ValidateSet("dev", "lab", "prod")]
+    [ValidateSet("dev", "lab", "prod", "staging")]
     [string]$Environment = "dev",
 
     [Parameter()]
@@ -55,6 +55,7 @@ $scriptDir  = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $rootDir    = Split-Path -Parent $scriptDir
 $tfvarsFile = Join-Path $rootDir "environments\$Environment.tfvars"
 $planFile   = Join-Path $rootDir "tfplan-$Environment"
+$stateKey   = "aks-landing-zone-lab-$Environment.tfstate"
 
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
@@ -75,6 +76,7 @@ if (-not (Test-Path $tfvarsFile)) {
 
 Write-Info "Environment: $Environment"
 Write-Info "Tfvars file: $tfvarsFile"
+Write-Info "State key:  $stateKey"
 Write-Host ""
 
 # ── Terraform Init ───────────────────────────────────────────────────────────
@@ -82,7 +84,7 @@ Write-Host ""
 Write-Info "Running terraform init..."
 Push-Location $rootDir
 try {
-    terraform init -input=false
+    terraform init -input=false -reconfigure -backend-config="key=$stateKey"
     if ($LASTEXITCODE -ne 0) {
         Write-Err "terraform init failed."
         exit 1
