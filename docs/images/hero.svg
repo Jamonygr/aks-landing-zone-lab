@@ -1,0 +1,71 @@
+<svg width="1400" height="420" viewBox="0 0 1400 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1400" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B2A40"/>
+      <stop offset="0.45" stop-color="#114A6A"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1400" height="420" rx="24" fill="url(#bg)"/>
+
+  <circle cx="1280" cy="74" r="130" fill="#38BDF8" fill-opacity="0.12"/>
+  <circle cx="210" cy="362" r="170" fill="#67E8F9" fill-opacity="0.10"/>
+  <circle cx="780" cy="40" r="90" fill="#A7F3D0" fill-opacity="0.10"/>
+
+  <rect x="62" y="60" width="764" height="300" rx="20" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.28"/>
+
+  <text x="100" y="132" fill="#E6FFFA" font-family="Segoe UI, Arial, sans-serif" font-size="46" font-weight="700">
+    AKS Landing Zone Lab
+  </text>
+  <text x="100" y="178" fill="#D1FAE5" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="500">
+    Terraform-driven Azure platform with hub-spoke networking,
+  </text>
+  <text x="100" y="214" fill="#D1FAE5" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="500">
+    AKS, governance, security controls, and day-2 operations scripts
+  </text>
+
+  <g transform="translate(100,248)">
+    <rect width="158" height="42" rx="11" fill="#0EA5E9" fill-opacity="0.26" stroke="#7DD3FC" stroke-opacity="0.8"/>
+    <text x="79" y="27" text-anchor="middle" fill="#E0F2FE" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">Hub-Spoke</text>
+  </g>
+  <g transform="translate(272,248)">
+    <rect width="128" height="42" rx="11" fill="#14B8A6" fill-opacity="0.24" stroke="#5EEAD4" stroke-opacity="0.8"/>
+    <text x="64" y="27" text-anchor="middle" fill="#CCFBF1" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">AKS</text>
+  </g>
+  <g transform="translate(414,248)">
+    <rect width="188" height="42" rx="11" fill="#22C55E" fill-opacity="0.22" stroke="#86EFAC" stroke-opacity="0.8"/>
+    <text x="94" y="27" text-anchor="middle" fill="#DCFCE7" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">Workload Identity</text>
+  </g>
+  <g transform="translate(616,248)">
+    <rect width="168" height="42" rx="11" fill="#F59E0B" fill-opacity="0.24" stroke="#FDE68A" stroke-opacity="0.8"/>
+    <text x="84" y="27" text-anchor="middle" fill="#FEF3C7" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">Operations</text>
+  </g>
+
+  <g transform="translate(880,74)">
+    <rect width="460" height="274" rx="18" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-opacity="0.30"/>
+    <rect x="30" y="34" width="118" height="62" rx="10" fill="#0EA5E9" fill-opacity="0.28" stroke="#7DD3FC"/>
+    <text x="89" y="71" text-anchor="middle" fill="#E0F2FE" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">Hub VNet</text>
+
+    <rect x="178" y="34" width="118" height="62" rx="10" fill="#22D3EE" fill-opacity="0.22" stroke="#67E8F9"/>
+    <text x="237" y="71" text-anchor="middle" fill="#ECFEFF" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">Spoke VNet</text>
+
+    <rect x="326" y="34" width="104" height="62" rx="10" fill="#14B8A6" fill-opacity="0.24" stroke="#5EEAD4"/>
+    <text x="378" y="71" text-anchor="middle" fill="#CCFBF1" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">AKS</text>
+
+    <line x1="148" y1="65" x2="178" y2="65" stroke="#BAE6FD" stroke-width="3"/>
+    <line x1="296" y1="65" x2="326" y2="65" stroke="#99F6E4" stroke-width="3"/>
+
+    <rect x="58" y="144" width="338" height="86" rx="12" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.28"/>
+    <text x="227" y="178" text-anchor="middle" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="600">
+      Security + Governance + Monitoring
+    </text>
+    <text x="227" y="206" text-anchor="middle" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="500">
+      Key Vault, Policies, Diagnostics, Alerts
+    </text>
+  </g>
+</svg>

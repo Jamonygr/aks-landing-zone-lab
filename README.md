@@ -1,64 +1,113 @@
 # AKS Landing Zone Lab
 
-Terraform-based AKS lab that models an Azure landing zone style platform
-with hub-spoke networking, security, governance, and operations tooling.
+<p align="center">
+  <img src="docs/images/hero.svg" alt="AKS Landing Zone Lab hero" width="100%" />
+</p>
 
-## What This Deploys
+<p align="center">
+  <img alt="Terraform >=1.5" src="https://img.shields.io/badge/Terraform-%3E%3D1.5-1f2937?style=for-the-badge&logo=terraform&logoColor=white" />
+  <img alt="Azure AKS" src="https://img.shields.io/badge/Azure-AKS-0ea5e9?style=for-the-badge&logo=microsoftazure&logoColor=white" />
+  <img alt="PowerShell Ops Scripts" src="https://img.shields.io/badge/PowerShell-Automation-0f766e?style=for-the-badge&logo=powershell&logoColor=white" />
+  <img alt="License MIT" src="https://img.shields.io/badge/License-MIT-111827?style=for-the-badge" />
+</p>
 
-- Hub and spoke virtual networks with peering
-- AKS cluster with system/user pools, OIDC, workload identity, Azure RBAC
-- Azure Container Registry (ACR) with AKS `AcrPull` role assignment
-- NGINX ingress with static public IP
-- Log Analytics, diagnostics, alerts, and budget controls
-- Key Vault, CSI Secrets Store driver, policy assignments
-- Optional features:
-  Firewall, Managed Prometheus, Managed Grafana, Defender, DNS zone
+Opinionated AKS platform lab built with Terraform and organized as landing zones: networking, AKS platform, management, security, governance, and identity.
 
-## Prerequisites
+## Contents
 
-- Azure subscription with rights to create networking, AKS, RBAC,
-  and policy resources
-- Azure CLI (`az`)
-- Terraform `>= 1.5`
-- kubectl
-- Helm
-- PowerShell 5.1+ (scripts are PowerShell)
+- [What You Get](#what-you-get)
+- [Architecture](#architecture)
+- [Quick Start](#quick-start)
+- [Terraform Workflow](#terraform-workflow)
+- [Environment Profiles](#environment-profiles)
+- [Cost Controls](#cost-controls)
+- [Operations Commands](#operations-commands)
+- [Repository Layout](#repository-layout)
+- [Validation and Known Issues](#validation-and-known-issues)
+- [Documentation](#documentation)
 
-## Quick Start (Scripts)
+## What You Get
 
-1. Bootstrap tools/login/backend:
+| Area | Included |
+|---|---|
+| Networking | Hub-spoke VNets, subnet segmentation, NSGs, route tables, optional Azure Firewall |
+| AKS Platform | AKS cluster with system/user pools, Azure CNI Overlay, Calico, OIDC, workload identity |
+| Ingress + Registry | NGINX ingress controller with static public IP, ACR + `AcrPull` role assignment |
+| Observability | Log Analytics, AKS diagnostics, metric and query-based alerts, budget alerts |
+| Security | Policy baseline assignment, Key Vault, CSI Secrets Store, optional Defender |
+| Governance + Identity | Custom policy definitions/assignments, managed identities, federated identity credentials |
+
+## Architecture
+
+![Architecture overview](docs/images/architecture-overview.svg)
+
+```mermaid
+graph TB
+    INTERNET((Internet))
+
+    subgraph HUB["Hub VNet 10.0.0.0/16"]
+        HUB_MGMT["snet-management<br/>10.0.0.0/24"]
+        HUB_SHARED["snet-shared-services<br/>10.0.1.0/24"]
+        HUB_FW["AzureFirewallSubnet<br/>10.0.2.0/24 (optional)"]
+    end
+
+    subgraph SPOKE["Spoke VNet 10.1.0.0/16"]
+        SPOKE_SYS["snet-aks-system<br/>10.1.0.0/24"]
+        SPOKE_USER["snet-aks-user<br/>10.1.1.0/24"]
+        SPOKE_ING["snet-ingress<br/>10.1.2.0/24"]
+    end
+
+    subgraph AKS["AKS Cluster"]
+        SYSPOOL["System Node Pool"]
+        USERPOOL["User Node Pool"]
+        NGINX["NGINX Ingress"]
+    end
+
+    subgraph AZ["Azure Services"]
+        ACR["Azure Container Registry"]
+        LAW["Log Analytics"]
+        KV["Key Vault"]
+    end
+
+    HUB <-->|VNet peering| SPOKE
+    INTERNET --> SPOKE_ING --> NGINX --> USERPOOL
+    SPOKE_SYS --> SYSPOOL
+    SPOKE_USER --> USERPOOL
+    AKS --> ACR
+    AKS --> LAW
+    AKS --> KV
+```
+
+![Deployment flow](docs/images/deployment-flow.svg)
+
+## Quick Start
+
+1. Bootstrap tools, Azure login, and Terraform backend.
 
 ```powershell
 .\scripts\bootstrap.ps1
 ```
 
-1. Deploy infrastructure:
+2. Deploy infrastructure.
 
 ```powershell
-# dev (budget-safe)
 .\scripts\deploy.ps1 -Environment dev
-
-# lab (more features enabled)
-.\scripts\deploy.ps1 -Environment lab
 ```
 
-1. Get kubeconfig and verify cluster access:
+3. Pull kubeconfig and verify cluster access.
 
 ```powershell
-# safest: use Terraform output generated from current state
-terraform output -raw kubeconfig_command
-# then run the printed az aks get-credentials command
-
+.\scripts\get-credentials.ps1 -Environment dev
 kubectl get nodes
 ```
 
-1. Deploy Kubernetes lab workloads:
+4. Deploy sample workloads.
 
 ```powershell
 .\scripts\deploy-workloads.ps1
 ```
 
-1. Save costs when idle:
+5. Pause and resume to reduce lab cost.
 
 ```powershell
 .\scripts\stop-lab.ps1 -Environment dev
@@ -66,75 +115,113 @@ kubectl get nodes
 .\scripts\cost-check.ps1 -Environment dev
 ```
 
-1. Tear down:
+6. Destroy when finished.
 
 ```powershell
 .\scripts\cleanup-workloads.ps1 -AutoApprove
 .\scripts\destroy.ps1 -Environment dev
 ```
 
-## Terraform-Only Workflow
+## Terraform Workflow
 
 ```powershell
 terraform init
 terraform plan  -var-file="environments/dev.tfvars"
 terraform apply -var-file="environments/dev.tfvars"
+terraform output kubeconfig_command
 ```
 
-## Environments
+Useful outputs:
 
-- `environments/dev.tfvars`: low-cost defaults
-- `environments/lab.tfvars`: enables more platform features
-- `environments/prod.tfvars`: reference profile with most toggles on
+```powershell
+terraform output cluster_name
+terraform output cluster_fqdn
+terraform output ingress_public_ip
+terraform output acr_login_server
+```
 
-Important variable behavior:
+## Environment Profiles
 
-- `enable_dns_zone = true` requires `dns_zone_name`
-- `enable_cluster_alerts` controls cluster-specific diagnostics/alerts
+| File | Purpose | Typical Cost Profile |
+|---|---|---|
+| `environments/dev.tfvars` | budget-safe defaults | lower cost |
+| `environments/lab.tfvars` | broader feature coverage | medium cost |
+| `environments/prod.tfvars` | reference profile with most toggles enabled | high cost |
 
-## Cost Toggles
+Important behavior:
 
-Main cost-affecting variables:
+- `enable_dns_zone = true` requires `dns_zone_name`.
+- Scripts currently support `dev`, `lab`, and `prod`.
+
+## Cost Controls
+
+Primary spend levers:
 
 - `enable_firewall`
 - `enable_managed_prometheus`
 - `enable_managed_grafana`
 - `enable_defender`
 - `enable_dns_zone`
-- `enable_azure_files`
+- `enable_cluster_alerts`
 
-Review current defaults in `environments/dev.tfvars`,
-`environments/lab.tfvars`, and `environments/prod.tfvars`.
+Review and tune in:
+
+- `environments/dev.tfvars`
+- `environments/lab.tfvars`
+- `environments/prod.tfvars`
+
+## Operations Commands
+
+```powershell
+# Deploy / update
+.\scripts\deploy.ps1 -Environment lab
+
+# Access cluster
+.\scripts\get-credentials.ps1 -Environment lab
+
+# Validate IaC
+terraform fmt -check -recursive
+terraform validate
+
+# Cost / lifecycle
+.\scripts\cost-check.ps1 -Environment lab
+.\scripts\stop-lab.ps1 -Environment lab
+.\scripts\start-lab.ps1 -Environment lab
+```
 
 ## Repository Layout
 
 ```text
 AKS/
-|- main.tf / providers.tf / variables.tf / locals.tf / outputs.tf
 |- backend.tf
-|- environments/                 # dev, lab, prod tfvars
-|- landing-zones/               # networking, aks-platform, management,
-|                               # security, governance, identity
-|- modules/                     # reusable Terraform modules
-|- k8s/                         # Kubernetes manifests (apps, security,
-|                               # autoscaling, storage, etc.)
-|- scripts/                     # bootstrap/deploy/destroy and ops scripts
-|- docs/                        # lab and operational documentation
-|- wiki/                        # deeper reference pages
+|- providers.tf
+|- main.tf
+|- variables.tf
+|- locals.tf
+|- outputs.tf
+|- environments/              # environment tfvars
+|- landing-zones/             # networking, aks-platform, management, security, governance, identity
+|- modules/                   # reusable Terraform modules
+|- k8s/                       # Kubernetes manifests
+|- scripts/                   # bootstrap, deploy, destroy, ops scripts
+|- docs/                      # architecture and operations guides
+|- wiki/                      # deeper reference content
 ```
 
-## Useful Outputs
+## Validation and Known Issues
 
-After apply:
+Current validation checks:
 
-```powershell
-terraform output
-terraform output cluster_name
-terraform output ingress_public_ip
-terraform output kubeconfig_command
-```
+- `terraform validate` passes.
+- `terraform fmt -check -recursive` currently flags `landing-zones/governance/main.tf`.
+- `terraform plan -var-file="environments/lab.tfvars" -lock=false -refresh=false -no-color` currently shows pending additions (`41 to add, 0 to change, 0 to destroy`).
 
-## Docs
+Known issues worth fixing before multi-environment use:
+
+- `backend.tf` uses a single remote state key (`aks-landing-zone-lab.tfstate`) for all environments.
+- Several provider deprecation warnings are present (`metric` blocks in diagnostic settings, `enable_rbac_authorization` in Key Vault).
+
+## Documentation
 
 - `docs/lab-guide.md`
 - `docs/architecture.md`
@@ -144,13 +231,6 @@ terraform output kubeconfig_command
 - `docs/chaos-guide.md`
 - `docs/gitops-guide.md`
 - `docs/troubleshooting.md`
-
-## Notes
-
-- Terraform validates cleanly.
-- You may still see one provider deprecation warning related to
-  AKS AAD block behavior under pinned `azurerm` v3.
-- Remote state is configured in `backend.tf` (Azure Storage backend).
 
 ## License
 
