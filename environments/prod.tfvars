@@ -14,7 +14,7 @@ hub_vnet_cidr       = "10.0.0.0/16"
 spoke_aks_vnet_cidr = "10.1.0.0/16"
 
 # ─── AKS ──────────────────────────────────────────────────────────────────────
-kubernetes_version       = "1.29"
+kubernetes_version       = "1.32"
 system_node_pool_vm_size = "Standard_B2s"
 user_node_pool_vm_size   = "Standard_B4ms"
 system_node_pool_min     = 2

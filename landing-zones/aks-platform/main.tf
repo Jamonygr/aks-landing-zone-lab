@@ -7,7 +7,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.85"
+      version = ">= 3.85"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -45,7 +45,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   default_node_pool {
     name                        = "system"
     vm_size                     = var.system_node_vm_size
-    enable_auto_scaling         = true
+    auto_scaling_enabled        = true
     min_count                   = var.system_node_min_count
     max_count                   = var.system_node_max_count
     vnet_subnet_id              = var.aks_system_subnet_id
@@ -76,8 +76,8 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   # RBAC & Azure AD Integration
   azure_active_directory_role_based_access_control {
-    managed            = true
     azure_rbac_enabled = true
+    tenant_id          = "da1065a7-b9e0-4bfd-bb18-bac1df30b72d"
   }
 
   # OIDC & Workload Identity
@@ -85,7 +85,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   workload_identity_enabled = true
 
   # Auto-upgrade
-  automatic_channel_upgrade = "patch"
+  automatic_upgrade_channel = "patch"
 
   # Maintenance Window
   maintenance_window_auto_upgrade {
@@ -126,7 +126,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
   name                  = "user"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
   vm_size               = var.user_node_vm_size
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = var.user_node_min_count
   max_count             = var.user_node_max_count
   vnet_subnet_id        = var.aks_user_subnet_id

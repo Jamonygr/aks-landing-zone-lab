@@ -108,7 +108,7 @@ variable "enable_app_insights" {
 variable "kubernetes_version" {
   description = "Kubernetes version"
   type        = string
-  default     = "1.29"
+  default     = "1.32"
 }
 
 variable "system_node_pool_vm_size" {

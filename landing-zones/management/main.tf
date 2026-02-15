@@ -7,7 +7,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.85"
+      version = ">= 3.85"
     }
   }
 }
@@ -330,7 +330,8 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "api_5xx" {
     query                   = <<-QUERY
       AzureDiagnostics
       | where Category == "kube-apiserver"
-      | where log_s contains "statusCode\":5"
+      | extend logMessage = column_ifexists("log_s", "")
+      | where logMessage contains "statusCode\":5"
       | summarize ErrorCount = count() by bin(TimeGenerated, 5m)
     QUERY
     time_aggregation_method = "Count"
@@ -415,26 +416,32 @@ resource "azurerm_consumption_budget_resource_group" "aks_budget" {
 # Log Ingestion Cap Alert
 #--------------------------------------------------------------
 
-resource "azurerm_monitor_metric_alert" "log_ingestion_cap" {
-  name                = "alert-log-ingestion-cap-${var.environment}"
-  resource_group_name = azurerm_resource_group.management.name
-  scopes              = [azurerm_log_analytics_workspace.main.id]
-  description         = "Alert when Log Analytics daily ingestion approaches the cap"
-  severity            = 2
-  frequency           = "PT1H"
-  window_size         = "PT1H"
-  tags                = var.tags
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "log_ingestion_cap" {
+  name                 = "alert-log-ingestion-cap-${var.environment}"
+  resource_group_name  = azurerm_resource_group.management.name
+  location             = azurerm_resource_group.management.location
+  scopes               = [azurerm_log_analytics_workspace.main.id]
+  description          = "Alert when Log Analytics daily ingestion approaches the cap"
+  severity             = 2
+  evaluation_frequency = "PT1H"
+  window_duration      = "P1D"
+  tags                 = var.tags
 
   criteria {
-    metric_namespace = "Microsoft.OperationalInsights/workspaces"
-    metric_name      = "BillableDataGB"
-    aggregation      = "Total"
-    operator         = "GreaterThan"
-    threshold        = var.log_analytics_daily_quota_gb * 0.8
+    query                   = <<-QUERY
+      Usage
+      | where TimeGenerated > ago(1d)
+      | where DataType != "Usage"
+      | summarize IngestedGB = sum(Quantity) / 1024.0
+    QUERY
+    time_aggregation_method = "Total"
+    operator                = "GreaterThan"
+    threshold               = var.log_analytics_daily_quota_gb * 0.8
+    metric_measure_column   = "IngestedGB"
   }
 
   action {
-    action_group_id = azurerm_monitor_action_group.aks_alerts.id
+    action_groups = [azurerm_monitor_action_group.aks_alerts.id]
   }
 }
 
@@ -512,7 +519,7 @@ resource "azurerm_dashboard_grafana" "main" {
   name                              = "grafana-aks-${var.environment}"
   resource_group_name               = azurerm_resource_group.management.name
   location                          = azurerm_resource_group.management.location
-  grafana_major_version             = 10
+  grafana_major_version             = 11
   api_key_enabled                   = true
   deterministic_outbound_ip_enabled = false
   public_network_access_enabled     = true

@@ -7,7 +7,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.85"
+      version = ">= 3.85"
     }
   }
 }
@@ -143,6 +143,14 @@ resource "azurerm_policy_definition" "enforce_acr_images" {
       }
       defaultValue = ["kube-system", "gatekeeper-system", "azure-arc", "ingress-nginx"]
     }
+    excludedContainers = {
+      type = "Array"
+      metadata = {
+        displayName = "Excluded Containers"
+        description = "Containers excluded from the policy"
+      }
+      defaultValue = []
+    }
   })
 
   policy_rule = jsonencode({
@@ -161,7 +169,8 @@ resource "azurerm_policy_definition" "enforce_acr_images" {
         kinds              = ["Pod"]
         excludedNamespaces = "[parameters('excludedNamespaces')]"
         values = {
-          imageRegex = "[parameters('allowedContainerImagesRegex')]"
+          imageRegex          = "[parameters('allowedContainerImagesRegex')]"
+          excludedContainers   = "[parameters('excludedContainers')]"
         }
       }
     }
