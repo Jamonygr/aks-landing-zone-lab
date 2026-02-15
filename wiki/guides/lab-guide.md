@@ -1,12 +1,46 @@
-# AKS Landing Zone Lab Guide
+<div align="center">
+  <img src="../images/guide-lab.svg" alt="Lab Guide" width="900"/>
+</div>
 
-> **Duration**: 8 days | **Budget**: ~$80–100/mo (dev defaults) | **Region**: East US
+<div align="center">
 
-This lab guide walks you through building, exploring, and operating an enterprise-grade AKS environment using a hub-spoke network topology, Infrastructure as Code (Terraform), and Kubernetes best practices.
+[![Duration](https://img.shields.io/badge/Duration-8_Days-blue?style=for-the-badge)](.)
+[![Budget](https://img.shields.io/badge/Budget-~$80--100/mo-green?style=for-the-badge)](.)
+[![Region](https://img.shields.io/badge/Region-East_US-orange?style=for-the-badge)](.)
+[![Level](https://img.shields.io/badge/Level-Intermediate-yellow?style=for-the-badge)](.)
+
+</div>
+
+# \ud83e\uddea AKS Landing Zone Lab Guide
+
+> **A hands-on, 8-day curriculum** for building, exploring, and operating an enterprise-grade AKS environment using hub-spoke networking, Terraform IaC, and Kubernetes best practices.
+
+<table>
+<tr>
+<td width="50%">
+
+**\ud83c\udfaf What You'll Learn**
+- Deploy enterprise AKS with Terraform
+- Configure hub-spoke network topology
+- Implement security best practices
+- Monitor with Container Insights & Prometheus
+
+</td>
+<td width="50%">
+
+**\ud83d\udee0\ufe0f Skills Developed**
+- Infrastructure as Code (Terraform)
+- Kubernetes operations & debugging
+- Azure networking & security
+- GitOps with Flux v2
+
+</td>
+</tr>
+</table>
 
 ---
 
-## Prerequisites
+## \ud83d\udccb Prerequisites
 
 Before starting any lab day, ensure the following tools are installed:
 

@@ -1,6 +1,22 @@
-# AKS Landing Zone Architecture
+<div align="center">
+  <img src="../images/guide-architecture.svg" alt="Architecture Guide" width="900"/>
+</div>
 
-## Overview
+<div align="center">
+
+[![Hub-Spoke](https://img.shields.io/badge/Topology-Hub--Spoke-blue?style=for-the-badge)](.)
+[![CAF](https://img.shields.io/badge/Pattern-Cloud_Adoption_Framework-green?style=for-the-badge)](.)
+[![Landing Zones](https://img.shields.io/badge/Landing_Zones-6-orange?style=for-the-badge)](.)
+
+</div>
+
+# \ud83c\udfd7\ufe0f AKS Landing Zone Architecture
+
+> **Enterprise-grade AKS deployment** following Azure CAF and AKS Landing Zone Accelerator patterns with hub-spoke networking.
+
+---
+
+## \ud83c\udf10 Overview
 
 This project implements an enterprise-grade AKS deployment following the Azure [Cloud Adoption Framework (CAF)](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/) and [AKS Landing Zone Accelerator](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/scenarios/app-platform/aks/landing-zone-accelerator) patterns. The architecture uses a **hub-spoke network topology** with centralized management, security, governance, and identity landing zones.
 

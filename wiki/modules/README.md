@@ -1,10 +1,22 @@
-# Module Index
+<div align="center">
+  <img src="../images/wiki-modules.svg" alt="Module Index" width="900"/>
+</div>
+
+<div align="center">
+
+[![Modules](https://img.shields.io/badge/Modules-14-purple?style=for-the-badge)](.)
+[![Sub-Modules](https://img.shields.io/badge/Sub--Modules-5-blue?style=for-the-badge)](.)
+[![Provider](https://img.shields.io/badge/azurerm-~>4.0-green?style=for-the-badge&logo=terraform)](.)
+
+</div>
+
+# \ud83e\udde9 Module Index
 
 The AKS Landing Zone Lab contains **14 reusable Terraform modules** (with 5 sub-modules under `monitoring/`), organized for composability and reuse across landing zones.
 
 ---
 
-## Module Directory
+## 📂 Module Directory
 
 ```
 modules/
@@ -37,9 +49,9 @@ modules/
 
 ---
 
-## Module Reference
+## 📚 Module Reference
 
-### Core Infrastructure
+### 🏗️ Core Infrastructure
 
 | Module | Description | Key Resources | Used By |
 |--------|------------|---------------|---------|
@@ -47,7 +59,7 @@ modules/
 | **naming** | Generates standardized resource names using a consistent naming convention | `local.names` map | Root module |
 | **storage** | Creates an Azure Storage Account with TLS 1.2 and disabled public blob access | `azurerm_storage_account` | Identity, Backup |
 
-### Networking
+### 🌐 Networking
 
 | Module | Description | Key Resources | Used By |
 |--------|------------|---------------|---------|
@@ -58,7 +70,7 @@ modules/
 | **networking/route-table** | Creates a Route Table with User-Defined Routes | `azurerm_route_table`, `azurerm_route` | Networking LZ |
 | **networking/private-dns-zone** | Creates a Private DNS Zone with VNet links | `azurerm_private_dns_zone` | Networking LZ |
 
-### Compute
+### ☁️ Compute
 
 | Module | Description | Key Resources | Used By |
 |--------|------------|---------------|---------|
@@ -66,7 +78,7 @@ modules/
 | **acr** | Creates an Azure Container Registry with AcrPull role assignment for AKS | `azurerm_container_registry`, `azurerm_role_assignment` | AKS Platform LZ |
 | **ingress** | Deploys NGINX Ingress Controller via Helm with a static public IP | `azurerm_public_ip`, `helm_release` | AKS Platform LZ |
 
-### Security
+### 🔒 Security
 
 | Module | Description | Key Resources | Used By |
 |--------|------------|---------------|---------|
@@ -76,7 +88,7 @@ modules/
 | **firewall** | Creates an Azure Firewall with a Standard public IP | `azurerm_firewall`, `azurerm_public_ip` | Networking LZ |
 | **firewall-rules** | Creates firewall network and application rule collections for AKS egress | `azurerm_firewall_network_rule_collection`, `azurerm_firewall_application_rule_collection` | Networking LZ |
 
-### Monitoring
+### 📊 Monitoring
 
 | Module | Description | Key Resources | Used By |
 |--------|------------|---------------|---------|
@@ -86,7 +98,7 @@ modules/
 | **monitoring/diagnostic-settings** | Creates diagnostic settings for any Azure resource (log categories + metrics) | `azurerm_monitor_diagnostic_setting` | All LZs |
 | **monitoring/nsg-flow-logs** | Creates NSG Flow Logs v2 with Traffic Analytics integration | `azurerm_network_watcher_flow_log` | Networking LZ |
 
-### Cost
+### 💰 Cost
 
 | Module | Description | Key Resources | Used By |
 |--------|------------|---------------|---------|
@@ -94,7 +106,7 @@ modules/
 
 ---
 
-## Module Design Principles
+## 🎯 Module Design Principles
 
 1. **Single Responsibility**: Each module creates one logical resource or tightly coupled group
 2. **Configurable via Variables**: All settings exposed through typed variables with sensible defaults
@@ -103,7 +115,7 @@ modules/
 5. **No Provider Configuration**: Modules inherit provider configuration from the root module
 6. **Versioned Providers**: Each landing zone pins `azurerm ~> 4.0`
 
-## Creating a New Module
+## ➕ Creating a New Module
 
 ```hcl
 # modules/my-module/main.tf
@@ -124,3 +136,11 @@ variable "tags" { type = map(string) ; default = {} }
 output "id" { value = azurerm_my_resource.this.id }
 output "name" { value = azurerm_my_resource.this.name }
 ```
+
+---
+
+<div align="center">
+
+**[&larr; Landing Zones](../landing-zones/README.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Wiki Home](../README.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Reference &rarr;](../reference/naming-conventions.md)**
+
+</div>

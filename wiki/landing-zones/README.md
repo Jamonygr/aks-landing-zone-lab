@@ -1,6 +1,18 @@
-# Landing Zones
+<div align="center">
+  <img src="../images/wiki-landing-zones.svg" alt="Landing Zones" width="900"/>
+</div>
 
-## Overview
+<div align="center">
+
+[![Zones](https://img.shields.io/badge/Landing_Zones-6-blue?style=for-the-badge)](.)
+[![CAF](https://img.shields.io/badge/Pattern-Cloud_Adoption_Framework-green?style=for-the-badge)](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/)
+[![Terraform](https://img.shields.io/badge/IaC-Terraform-purple?style=for-the-badge&logo=terraform)](.)
+
+</div>
+
+# \ud83c\udfd7\ufe0f Landing Zones
+
+## \ud83c\udf10 Overview
 
 The AKS Landing Zone Lab organizes infrastructure into **six landing zones**, each responsible for a specific domain. This mirrors the [Azure Cloud Adoption Framework landing zone model](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/) where platform capabilities are separated into independently deployable units.
 
@@ -44,9 +56,9 @@ The AKS Landing Zone Lab organizes infrastructure into **six landing zones**, ea
 
 ---
 
-## Landing Zone Details
+## 📚 Landing Zone Details
 
-### 1. Networking (`landing-zones/networking/`)
+### 🌐 1. Networking (`landing-zones/networking/`)
 
 **Purpose**: Establishes the foundational network topology for all other landing zones.
 
@@ -71,7 +83,7 @@ The AKS Landing Zone Lab organizes infrastructure into **six landing zones**, ea
 
 ---
 
-### 2. AKS Platform (`landing-zones/aks-platform/`)
+### ☁️ 2. AKS Platform (`landing-zones/aks-platform/`)
 
 **Purpose**: Deploys the Kubernetes compute platform with supporting services.
 
@@ -93,7 +105,7 @@ The AKS Landing Zone Lab organizes infrastructure into **six landing zones**, ea
 
 ---
 
-### 3. Management (`landing-zones/management/`)
+### 📊 3. Management (`landing-zones/management/`)
 
 **Purpose**: Centralized observability, alerting, and cost management.
 
@@ -117,7 +129,7 @@ The AKS Landing Zone Lab organizes infrastructure into **six landing zones**, ea
 
 ---
 
-### 4. Security (`landing-zones/security/`)
+### 🔒 4. Security (`landing-zones/security/`)
 
 **Purpose**: Security controls for secrets, policies, and threat detection.
 
@@ -137,7 +149,7 @@ The AKS Landing Zone Lab organizes infrastructure into **six landing zones**, ea
 
 ---
 
-### 5. Governance (`landing-zones/governance/`)
+### 📜 5. Governance (`landing-zones/governance/`)
 
 **Purpose**: Custom Azure Policy definitions and assignments for organizational compliance.
 
@@ -155,7 +167,7 @@ The AKS Landing Zone Lab organizes infrastructure into **six landing zones**, ea
 
 ---
 
-### 6. Identity (`landing-zones/identity/`)
+### 🔑 6. Identity (`landing-zones/identity/`)
 
 **Purpose**: Workload Identity federation enabling pods to access Azure services without stored credentials.
 
@@ -177,7 +189,7 @@ The AKS Landing Zone Lab organizes infrastructure into **six landing zones**, ea
 
 ---
 
-## Deployment Order
+## 🚀 Deployment Order
 
 Landing zones are deployed sequentially through `depends_on` chains in the root module:
 
@@ -192,7 +204,7 @@ Landing zones are deployed sequentially through `depends_on` chains in the root 
 
 Steps 3–6 run in parallel after step 2 completes (Terraform resolves the dependency graph).
 
-## Adding a New Landing Zone
+## ➕ Adding a New Landing Zone
 
 To add a new landing zone:
 
@@ -200,3 +212,11 @@ To add a new landing zone:
 2. Add a module block in the root `main.tf`
 3. Wire up inputs from existing landing zone outputs
 4. Add `depends_on` to ensure correct ordering
+
+---
+
+<div align="center">
+
+**[&larr; Wiki Home](../README.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Modules &rarr;](../modules/README.md)**
+
+</div>

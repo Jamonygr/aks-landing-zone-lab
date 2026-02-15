@@ -1,8 +1,21 @@
-# Naming Conventions
+<div align="center">
+  <img src="../images/wiki-reference.svg" alt="Reference" width="900"/>
+</div>
+
+<div align="center">
+
+[![CAF](https://img.shields.io/badge/Standard-Cloud_Adoption_Framework-blue?style=for-the-badge)](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming)
+[![Pattern](https://img.shields.io/badge/Pattern-prefix--project--env-green?style=for-the-badge)](.)
+
+</div>
+
+# \ud83c\udff7\ufe0f Naming Conventions
 
 All Azure resources in the AKS Landing Zone Lab follow a consistent naming convention based on Microsoft's [Cloud Adoption Framework naming guidance](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming).
 
-## Convention Pattern
+---
+
+## \ud83d\udcdd Convention Pattern
 
 ```
 {resource-type-prefix}-{project-name}-{environment}-{qualifier}
@@ -15,7 +28,7 @@ All Azure resources in the AKS Landing Zone Lab follow a consistent naming conve
 | Environment | Deployment environment | `dev`, `lab`, `prod` |
 | Qualifier | Optional sub-component | `hub`, `spoke`, `system` |
 
-## Naming Variables
+## ⚙️ Naming Variables
 
 Set in `variables.tf` / `locals.tf`:
 
@@ -35,9 +48,9 @@ locals {
 
 ---
 
-## Resource Naming Reference
+## 📚 Resource Naming Reference
 
-### Resource Groups
+### 📦 Resource Groups
 
 | Resource | Naming Pattern | Example (dev) |
 |----------|---------------|---------------|
@@ -48,7 +61,7 @@ locals {
 | Identity | `rg-identity-{env}` | `rg-identity-dev` |
 | Terraform State | `rg-terraform-state` | `rg-terraform-state` |
 
-### Networking
+### 🌐 Networking
 
 | Resource | Naming Pattern | Example (dev) |
 |----------|---------------|---------------|
@@ -65,7 +78,7 @@ locals {
 | NSG (Ingress) | `nsg-ingress-{env}` | `nsg-ingress-dev` |
 | Route Table | `rt-spoke-{env}` | `rt-spoke-dev` |
 
-### Compute
+### ☁️ Compute
 
 | Resource | Naming Pattern | Example (dev) |
 |----------|---------------|---------------|
@@ -75,7 +88,7 @@ locals {
 | Container Registry | `acr{project}{env}` | `acrakslab dev` (no hyphens allowed) |
 | Public IP (Ingress) | `pip-ingress-{env}` | `pip-ingress-dev` |
 
-### Monitoring
+### 📊 Monitoring
 
 | Resource | Naming Pattern | Example (dev) |
 |----------|---------------|---------------|
@@ -85,14 +98,14 @@ locals {
 | Alert Rule | `alert-{condition}-{env}` | `alert-node-cpu-dev` |
 | Budget | `budget-{project}-{env}` | `budget-akslab-dev` |
 
-### Security
+### 🔒 Security
 
 | Resource | Naming Pattern | Example (dev) |
 |----------|---------------|---------------|
 | Key Vault | `kv-aks-{env}-{hash}` | `kv-aks-dev-a1b2c3` |
 | Policy Assignment | `pol-{policy}-{env}` | `pol-pod-security-baseline-dev` |
 
-### Identity
+### 🔑 Identity
 
 | Resource | Naming Pattern | Example (dev) |
 |----------|---------------|---------------|
@@ -101,7 +114,7 @@ locals {
 | Federated Credential | `fic-{purpose}-{cluster}` | `fic-workload-aks-akslab-dev` |
 | Storage Account | `stmetrics{env}{hash}` | `stmetricsdev1a2b3c` |
 
-### Firewall (Optional)
+### 🔥 Firewall (Optional)
 
 | Resource | Naming Pattern | Example (dev) |
 |----------|---------------|---------------|
@@ -112,7 +125,7 @@ locals {
 
 ---
 
-## Kubernetes Resource Naming
+## ☸️ Kubernetes Resource Naming
 
 Kubernetes resources follow a separate naming convention within the cluster:
 
@@ -141,7 +154,7 @@ Kubernetes resources follow a separate naming convention within the cluster:
 
 ---
 
-## Special Naming Rules
+## ⚠️ Special Naming Rules
 
 | Resource Type | Rule | Reason |
 |---|---|---|
@@ -153,7 +166,7 @@ Kubernetes resources follow a separate naming convention within the cluster:
 
 ---
 
-## Naming Module
+## ⚙️ Naming Module
 
 The `modules/naming/` module generates all names using the project and environment variables:
 
@@ -172,7 +185,7 @@ Available names from the module: `rg_hub`, `rg_spoke`, `rg_mgmt`, `vnet_hub`, `v
 
 ---
 
-## Tagging Convention
+## 🏷️ Tagging Convention
 
 All resources receive a standard tag set defined in `locals.tf`:
 
@@ -184,3 +197,11 @@ All resources receive a standard tag set defined in `locals.tf`:
 | `managed_by` | `terraform` | IaC identification |
 | `lab` | `aks-landing-zone` | Lab identification |
 | `created` | ISO 8601 timestamp | Creation tracking |
+
+---
+
+<div align="center">
+
+**[&larr; Modules](../modules/README.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Wiki Home](../README.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Variables &rarr;](variables.md)**
+
+</div>

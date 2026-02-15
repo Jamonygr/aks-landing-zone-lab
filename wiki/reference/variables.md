@@ -1,10 +1,22 @@
-# Variables Reference
+<div align="center">
+  <img src="../images/wiki-reference.svg" alt="Reference" width="900"/>
+</div>
+
+<div align="center">
+
+[![Variables](https://img.shields.io/badge/Variables-20+-blue?style=for-the-badge)](.) 
+[![Toggles](https://img.shields.io/badge/Feature_Toggles-8-green?style=for-the-badge)](.) 
+[![Environments](https://img.shields.io/badge/Environments-3-orange?style=for-the-badge)](.) 
+
+</div>
+
+# 📋 Variables Reference
 
 All Terraform input variables for the AKS Landing Zone Lab, defined in the root `variables.tf`.
 
 ---
 
-## General
+## 🌐 General
 
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
@@ -15,7 +27,7 @@ All Terraform input variables for the AKS Landing Zone Lab, defined in the root 
 
 ---
 
-## Networking
+## \ud83c\udf10 Networking
 
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
@@ -24,7 +36,7 @@ All Terraform input variables for the AKS Landing Zone Lab, defined in the root 
 
 ---
 
-## Optional Toggles
+## 🔀 Optional Toggles
 
 These boolean variables enable or disable optional components. All are **OFF** by default in the dev environment to minimize cost.
 
@@ -41,7 +53,7 @@ These boolean variables enable or disable optional components. All are **OFF** b
 
 ---
 
-## AKS Configuration
+## ☸️ AKS Configuration
 
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
@@ -55,7 +67,7 @@ These boolean variables enable or disable optional components. All are **OFF** b
 
 ---
 
-## DNS
+## 🌐 DNS
 
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
@@ -63,7 +75,7 @@ These boolean variables enable or disable optional components. All are **OFF** b
 
 ---
 
-## Alerting & Cost
+## 💰 Alerting & Cost
 
 | Variable | Type | Default | Validation | Description |
 |----------|------|---------|------------|-------------|
@@ -72,7 +84,7 @@ These boolean variables enable or disable optional components. All are **OFF** b
 
 ---
 
-## Environment Files
+## 📂 Environment Files
 
 Variable values are set per environment in `environments/`:
 
@@ -123,7 +135,7 @@ enable_azure_files          = true
 
 ---
 
-## Usage
+## 🚀 Usage
 
 ```powershell
 # Deploy with dev defaults
@@ -141,3 +153,11 @@ terraform apply -var-file="environments/dev.tfvars" -var="enable_managed_grafana
 .\scripts\deploy.ps1 -Environment dev
 .\scripts\deploy.ps1 -Environment lab
 ```
+
+---
+
+<div align="center">
+
+**[&larr; Naming Conventions](naming-conventions.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Wiki Home](../README.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Outputs &rarr;](outputs.md)**
+
+</div>

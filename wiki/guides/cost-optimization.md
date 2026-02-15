@@ -1,6 +1,22 @@
-# Cost Optimization Guide
+<div align="center">
+  <img src="../images/guide-cost.svg" alt="Cost Optimization Guide" width="900"/>
+</div>
 
-## Budget Overview
+<div align="center">
+
+[![Budget](https://img.shields.io/badge/Budget-~$80--100/mo-green?style=for-the-badge)](.)
+[![Savings](https://img.shields.io/badge/With_Stop/Start-~$55--75/mo-blue?style=for-the-badge)](.)
+[![Toggles](https://img.shields.io/badge/Feature_Toggles-10-orange?style=for-the-badge)](.)
+
+</div>
+
+# \ud83d\udcb0 Cost Optimization Guide
+
+> **Keep your Azure bill under control** — budget management, stop/start automation, and feature toggles for cost-effective AKS learning.
+
+---
+
+## \ud83d\udcca Budget Overview
 
 The AKS Landing Zone Lab is designed for a **monthly budget of ~$80–100** with all optional toggles OFF, or **~$55–75** using stop/start scripts.
 

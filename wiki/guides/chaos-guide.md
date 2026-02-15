@@ -1,6 +1,22 @@
-# Chaos Engineering Guide
+<div align="center">
+  <img src="../images/guide-chaos.svg" alt="Chaos Engineering Guide" width="900"/>
+</div>
 
-## Overview
+<div align="center">
+
+[![Chaos Mesh](https://img.shields.io/badge/Chaos_Mesh-v2.7-purple?style=for-the-badge)](https://chaos-mesh.org/)
+[![CNCF](https://img.shields.io/badge/CNCF-Incubating-blue?style=for-the-badge&logo=cncf)](.)
+[![Experiments](https://img.shields.io/badge/Experiments-3_Types-orange?style=for-the-badge)](.)
+
+</div>
+
+# \ud83d\udca5 Chaos Engineering Guide
+
+> **Break things on purpose** — deliberately introduce failures to test resilience, verify monitoring, and build confidence in your AKS cluster's ability to self-heal.
+
+---
+
+## \ud83c\udf10 Overview
 
 Chaos engineering deliberately introduces failures into a system to test its resilience and verify that monitoring and alerting work correctly. This lab uses [Chaos Mesh](https://chaos-mesh.org/) — a CNCF project — to run controlled experiments on the AKS cluster.
 

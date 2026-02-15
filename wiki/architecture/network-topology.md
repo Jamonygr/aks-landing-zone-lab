@@ -1,6 +1,17 @@
-# Network Topology
+<div align="center">
 
-## Hub-Spoke Architecture
+# 🌐 Network Topology
+
+**Hub-spoke architecture following Microsoft's recommended enterprise pattern**
+
+[![Hub-Spoke](https://img.shields.io/badge/Pattern-Hub--Spoke-0078D4?style=flat-square&logo=microsoftazure)](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/hybrid-networking/hub-spoke)
+[![Azure CNI](https://img.shields.io/badge/Plugin-Azure_CNI_Overlay-326CE5?style=flat-square&logo=kubernetes)](https://learn.microsoft.com/en-us/azure/aks/azure-cni-overlay)
+
+---
+
+</div>
+
+## 🏗 Hub-Spoke Architecture
 
 The lab implements a hub-spoke network topology — the [recommended pattern](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/hybrid-networking/hub-spoke) for enterprise Azure deployments.
 
@@ -39,19 +50,19 @@ The lab implements a hub-spoke network topology — the [recommended pattern](ht
 
 ### Why Hub-Spoke?
 
-| Benefit | Description |
-|---------|-------------|
-| **Centralized services** | Shared DNS, monitoring, and firewall in the hub |
-| **Workload isolation** | Each spoke is an independent network boundary |
-| **Scalability** | Add new spokes without modifying the hub |
-| **Security** | Traffic between spokes can be forced through the hub firewall |
-| **Cost efficiency** | Shared services are not duplicated per workload |
+<table>
+<tr><td>🏢</td><td><b>Centralized services</b></td><td>Shared DNS, monitoring, and firewall in the hub</td></tr>
+<tr><td>🔒</td><td><b>Workload isolation</b></td><td>Each spoke is an independent network boundary</td></tr>
+<tr><td>📈</td><td><b>Scalability</b></td><td>Add new spokes without modifying the hub</td></tr>
+<tr><td>🛡</td><td><b>Security</b></td><td>Traffic between spokes can be forced through the hub firewall</td></tr>
+<tr><td>💰</td><td><b>Cost efficiency</b></td><td>Shared services are not duplicated per workload</td></tr>
+</table>
 
 ---
 
-## IP Addressing Plan
+## 📋 IP Addressing Plan
 
-### Hub VNet: 10.0.0.0/16
+### Hub VNet: `10.0.0.0/16`
 
 | Subnet Name | CIDR | IP Range | Usable IPs | Purpose |
 |-------------|------|----------|------------|---------|
@@ -60,7 +71,7 @@ The lab implements a hub-spoke network topology — the [recommended pattern](ht
 | `AzureFirewallSubnet` | 10.0.2.0/24 | 10.0.2.4 – 10.0.2.254 | 251 | Azure Firewall (requires this exact name) |
 | *Reserved* | 10.0.3.0/24 – 10.0.255.0/24 | — | ~64,000 | Future expansion |
 
-### Spoke VNet: 10.1.0.0/16
+### Spoke VNet: `10.1.0.0/16`
 
 | Subnet Name | CIDR | IP Range | Usable IPs | Purpose |
 |-------------|------|----------|------------|---------|
@@ -69,7 +80,7 @@ The lab implements a hub-spoke network topology — the [recommended pattern](ht
 | `snet-ingress` | 10.1.2.0/24 | 10.1.2.4 – 10.1.2.254 | 251 | NGINX ingress controller / Azure Load Balancer |
 | *Reserved* | 10.1.3.0/24 – 10.1.255.0/24 | — | ~64,000 | Future expansion |
 
-### AKS Internal Networking
+### AKS Overlay Networking
 
 | Network | CIDR | Purpose |
 |---------|------|---------|
@@ -81,7 +92,7 @@ The lab implements a hub-spoke network topology — the [recommended pattern](ht
 
 ---
 
-## VNet Peering
+## 🔗 VNet Peering
 
 Two peering connections establish bidirectional connectivity:
 
@@ -99,7 +110,7 @@ az network vnet peering list -g rg-spoke-aks-networking-dev --vnet-name vnet-spo
 
 ---
 
-## Network Security Groups (NSGs)
+## 🛡 Network Security Groups (NSGs)
 
 Each subnet has a dedicated NSG with explicit allow/deny rules.
 
@@ -130,7 +141,7 @@ Each subnet has a dedicated NSG with explicit allow/deny rules.
 
 ---
 
-## Traffic Flows
+## 🚦 Traffic Flows
 
 ### 1. Ingress: Internet → Application
 
@@ -213,7 +224,7 @@ Spoke Resource (10.1.x.x)
 
 ---
 
-## Route Tables
+## 🗺 Route Tables
 
 ### Spoke Route Table: rt-spoke-{env}
 
@@ -227,7 +238,7 @@ Spoke Resource (10.1.x.x)
 
 ---
 
-## Diagnostic Settings
+## 📊 Diagnostic Settings
 
 Network resources send diagnostic logs to the Log Analytics Workspace:
 
@@ -254,3 +265,11 @@ AzureNetworkAnalytics_CL
 | summarize FlowCount = count() by FlowDirection_s, FlowStatus_s, bin(TimeGenerated, 5m)
 | render timechart
 ```
+
+---
+
+<div align="center">
+
+**[⬆ Back to Architecture Overview](overview.md)** · **[Wiki Home](../README.md)**
+
+</div>

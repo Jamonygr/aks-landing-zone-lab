@@ -1,6 +1,22 @@
-# Monitoring Guide
+<div align="center">
+  <img src="../images/guide-monitoring.svg" alt="Monitoring Guide" width="900"/>
+</div>
 
-## Overview
+<div align="center">
+
+[![Container Insights](https://img.shields.io/badge/Container_Insights-Enabled-green?style=for-the-badge&logo=microsoft-azure)](.)
+[![Prometheus](https://img.shields.io/badge/Prometheus-Optional-blue?style=for-the-badge&logo=prometheus)](.)
+[![Grafana](https://img.shields.io/badge/Grafana-Optional-orange?style=for-the-badge&logo=grafana)](.)
+
+</div>
+
+# \ud83d\udcca Monitoring Guide
+
+> **Full observability stack** — from basic container logging to advanced metrics, dashboards, and alerting for your AKS Landing Zone.
+
+---
+
+## \ud83c\udf10 Overview
 
 The AKS Landing Zone Lab uses a layered monitoring approach:
 

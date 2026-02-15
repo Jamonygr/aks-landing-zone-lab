@@ -1,6 +1,22 @@
-# GitOps Guide
+<div align="center">
+  <img src="../images/guide-gitops.svg" alt="GitOps Guide" width="900"/>
+</div>
 
-## Overview
+<div align="center">
+
+[![Flux v2](https://img.shields.io/badge/Flux-v2-blue?style=for-the-badge&logo=flux)](https://fluxcd.io/)
+[![CNCF](https://img.shields.io/badge/CNCF-Graduated-green?style=for-the-badge&logo=cncf)](.)
+[![GitOps](https://img.shields.io/badge/GitOps-Declarative-purple?style=for-the-badge)](.)
+
+</div>
+
+# \ud83d\udd04 GitOps Guide
+
+> **Git as the single source of truth** — automated reconciliation, declarative deployments, and full audit trails with Flux v2.
+
+---
+
+## \ud83c\udf10 Overview
 
 GitOps is an operational model where the desired state of the cluster is declared in a Git repository, and an in-cluster agent automatically reconciles the actual state to match. This lab uses [Flux v2](https://fluxcd.io/) — a CNCF graduated project — as the GitOps operator.
 

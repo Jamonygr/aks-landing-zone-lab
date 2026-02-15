@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/hero.svg" alt="AKS Landing Zone Lab" width="100%"/>
+<img src="wiki/images/hero.svg" alt="AKS Landing Zone Lab" width="100%"/>
 
 <br/>
 
@@ -11,7 +11,7 @@
 
 **Enterprise-grade AKS infrastructure built with Terraform landing zones**
 
-[Architecture](#-architecture) · [Quick Start](#-quick-start) · [Environments](#-environments) · [Docs](#-documentation) · [Lab Guide](docs/lab-guide.md)
+[Architecture](#-architecture) · [Quick Start](#-quick-start) · [Environments](#-environments) · [Docs](#-documentation) · [Lab Guide](wiki/guides/lab-guide.md)
 
 ---
 
@@ -28,7 +28,7 @@ A **production-ready** Azure Kubernetes Service deployment following Microsoft's
 ## 🏗 Architecture
 
 <div align="center">
-<img src="docs/images/architecture-overview.svg" alt="Architecture Overview" width="100%"/>
+<img src="wiki/images/architecture-overview.svg" alt="Architecture Overview" width="100%"/>
 </div>
 
 <br/>
@@ -83,7 +83,7 @@ The infrastructure is organized into **six independently deployable landing zone
 ### Deployment Flow
 
 <div align="center">
-<img src="docs/images/deployment-flow.svg" alt="Deployment Flow" width="100%"/>
+<img src="wiki/images/deployment-flow.svg" alt="Deployment Flow" width="100%"/>
 </div>
 
 <br/>
@@ -285,8 +285,7 @@ aks-landing-zone-lab/
 │   └── backup/                #   Velero schedules
 │
 ├── scripts/                   # PowerShell operational scripts
-├── docs/                      # Detailed guides and architecture docs
-└── wiki/                      # Extended wiki documentation
+└── wiki/                      # Documentation, guides, and images
 ```
 
 <br/>
@@ -344,19 +343,19 @@ aks-landing-zone-lab/
 <td width="50%">
 
 ### Guides
-- 📘 [Lab Guide](docs/lab-guide.md) — 8-day structured curriculum
-- 🏛 [Architecture](docs/architecture.md) — Network topology and components
-- 📊 [Monitoring Guide](docs/monitoring-guide.md) — Alerts, dashboards, queries
-- 🔒 [Security Guide](docs/security-guide.md) — Defense-in-depth controls
+- 📘 [Lab Guide](wiki/guides/lab-guide.md) — 8-day structured curriculum
+- 🏛 [Architecture](wiki/guides/architecture.md) — Network topology and components
+- 📊 [Monitoring Guide](wiki/guides/monitoring-guide.md) — Alerts, dashboards, queries
+- 🔒 [Security Guide](wiki/guides/security-guide.md) — Defense-in-depth controls
 
 </td>
 <td width="50%">
 
 ### Advanced Topics
-- 💰 [Cost Optimization](docs/cost-optimization.md) — Budget controls and savings
-- 💥 [Chaos Guide](docs/chaos-guide.md) — Chaos Mesh fault injection
-- 🔄 [GitOps Guide](docs/gitops-guide.md) — Flux v2 automation
-- 🔧 [Troubleshooting](docs/troubleshooting.md) — Common issues and fixes
+- 💰 [Cost Optimization](wiki/guides/cost-optimization.md) — Budget controls and savings
+- 💥 [Chaos Guide](wiki/guides/chaos-guide.md) — Chaos Mesh fault injection
+- 🔄 [GitOps Guide](wiki/guides/gitops-guide.md) — Flux v2 automation
+- 🔧 [Troubleshooting](wiki/guides/troubleshooting.md) — Common issues and fixes
 
 </td>
 </tr>

@@ -1,6 +1,18 @@
-# Security Model
+<div align="center">
 
-## Defense-in-Depth Layers
+# 🔐 Security Model
+
+**Defense-in-depth across six independently protective layers**
+
+[![Zero Trust](https://img.shields.io/badge/Approach-Zero_Trust-E34F26?style=flat-square)](#)
+[![Calico](https://img.shields.io/badge/Network_Policy-Calico-FF6600?style=flat-square)](#)
+[![Key Vault](https://img.shields.io/badge/Secrets-Azure_Key_Vault-0078D4?style=flat-square&logo=microsoftazure)](#)
+
+---
+
+</div>
+
+## 🏠 Defense-in-Depth Layers
 
 The AKS Landing Zone Lab implements security across six layers, each providing independent protection:
 
@@ -28,7 +40,7 @@ The AKS Landing Zone Lab implements security across six layers, each providing i
 
 ---
 
-## Layer 1: Network Perimeter (NSGs + Firewall)
+## 🌐 Layer 1: Network Perimeter (NSGs + Firewall)
 
 ### Network Security Groups
 
@@ -51,7 +63,7 @@ When `enable_firewall = true`, all spoke egress routes through the hub firewall:
 
 ---
 
-## Layer 2: Cluster Network (Calico)
+## 🔗 Layer 2: Cluster Network (Calico)
 
 AKS uses Calico as the network policy engine, providing L3/L4 pod-level traffic segmentation.
 
@@ -82,7 +94,7 @@ kubectl run test -n lab-monitoring --image=busybox:1.36 --restart=Never \
 
 ---
 
-## Layer 3: Pod Security (PSA)
+## 🛡 Layer 3: Pod Security (PSA)
 
 Pod Security Admission enforces [Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/) at the namespace level.
 
@@ -138,7 +150,7 @@ spec:
 
 ---
 
-## Layer 4: Secrets Management (Key Vault + CSI)
+## 🔑 Layer 4: Secrets Management (Key Vault + CSI)
 
 ### Architecture
 
@@ -173,7 +185,7 @@ Azure Key Vault (RBAC-enabled)
 
 ---
 
-## Layer 5: Governance (Azure Policy)
+## 📜 Layer 5: Governance (Azure Policy)
 
 ### Built-in Policy
 
@@ -203,7 +215,7 @@ Azure Policy evaluates compliance every 15 minutes. Non-compliant resources are 
 
 ---
 
-## Layer 6: Runtime Protection (Defender)
+## 🛰 Layer 6: Runtime Protection (Defender)
 
 > Optional: `enable_defender = true` (+$7/node/month)
 
@@ -228,7 +240,7 @@ Azure Policy evaluates compliance every 15 minutes. Non-compliant resources are 
 
 ---
 
-## Identity Model
+## 🪡 Identity Model
 
 ### Managed Identities
 
@@ -239,7 +251,7 @@ Azure Policy evaluates compliance every 15 minutes. Non-compliant resources are 
 | Workload Identity | User-Assigned | lab-apps namespace | Pods authenticate to Azure services without credentials |
 | Metrics App Identity | User-Assigned | lab-apps namespace | Metrics app writes to Azure Storage |
 
-### Workload Identity Flow
+### 🔄 Workload Identity Flow
 
 ```
 1. Pod starts with service account annotated with managed identity client ID
@@ -253,7 +265,7 @@ No credentials are stored in the cluster. The federated identity credential maps
 - **Subject**: `system:serviceaccount:{namespace}:{service-account-name}`
 - **Audience**: `api://AzureADTokenExchange`
 
-### RBAC Configuration
+### 👥 RBAC Configuration
 
 | Role | Scope | Bound To | Purpose |
 |------|-------|----------|---------|
@@ -264,9 +276,9 @@ No credentials are stored in the cluster. The federated identity credential maps
 
 ---
 
-## Security Verification Checklist
+## ✅ Security Verification Checklist
 
-Run these checks to verify the security posture:
+> Run these checks to verify the security posture after deployment:
 
 ```powershell
 # 1. Verify network policies
@@ -294,3 +306,11 @@ az aks show -g rg-spoke-aks-networking-dev -n aks-akslab-dev --query networkProf
 # 7. Verify Azure Policy assignments
 az policy assignment list --scope $(az aks show -g rg-spoke-aks-networking-dev -n aks-akslab-dev --query id -o tsv) --query "[].displayName" -o tsv
 ```
+
+---
+
+<div align="center">
+
+**[⬆ Back to Architecture Overview](overview.md)** · **[Wiki Home](../README.md)**
+
+</div>

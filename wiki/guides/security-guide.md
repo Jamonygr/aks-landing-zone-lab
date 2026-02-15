@@ -1,6 +1,23 @@
-# Security Guide
+<div align="center">
+  <img src="../images/guide-security.svg" alt="Security Guide" width="900"/>
+</div>
 
-## Overview
+<div align="center">
+
+[![Network Policies](https://img.shields.io/badge/Network_Policies-Calico-blue?style=for-the-badge)](.)
+[![PSA](https://img.shields.io/badge/Pod_Security-Admission-green?style=for-the-badge)](.)
+[![Key Vault](https://img.shields.io/badge/Key_Vault-CSI_Driver-purple?style=for-the-badge)](.)
+[![Zero Trust](https://img.shields.io/badge/Zero_Trust-Enabled-red?style=for-the-badge)](.)
+
+</div>
+
+# \ud83d\udd12 Security Guide
+
+> **Defense-in-depth security** across 6 layers — from network isolation to runtime threat detection.
+
+---
+
+## \ud83c\udf10 Overview
 
 The AKS Landing Zone Lab implements defense-in-depth security across multiple layers:
 

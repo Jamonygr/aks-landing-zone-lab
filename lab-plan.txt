@@ -264,14 +264,14 @@ AA. OPERATIONAL SCRIPTS (9)
 BB. DOCUMENTATION (9)
 ================================================================================
   145. README.md                    - Overview, Mermaid architecture diagram, quick start
-  146. docs/lab-guide.md            - Step-by-step exercises (Day 1 -> Day N)
-  147. docs/architecture.md         - Hub-spoke diagram, IP plan, traffic flows
-  148. docs/monitoring-guide.md     - KQL queries, dashboard walkthrough, alert testing
-  149. docs/troubleshooting.md      - Common errors & fixes
-  150. docs/cost-optimization.md    - Stay under budget, teardown reminders
-  151. docs/security-guide.md       - Policy, network policy testing, secrets
-  152. docs/chaos-guide.md          - Chaos experiments & recovery procedures
-  153. docs/gitops-guide.md         - Flux setup & workflow
+  146. wiki/guides/lab-guide.md    - Step-by-step exercises (Day 1 -> Day N)
+  147. wiki/guides/architecture.md  - Hub-spoke diagram, IP plan, traffic flows
+  148. wiki/guides/monitoring-guide.md - KQL queries, dashboard walkthrough, alert testing
+  149. wiki/guides/troubleshooting.md  - Common errors & fixes
+  150. wiki/guides/cost-optimization.md - Stay under budget, teardown reminders
+  151. wiki/guides/security-guide.md   - Policy, network policy testing, secrets
+  152. wiki/guides/chaos-guide.md      - Chaos experiments & recovery procedures
+  153. wiki/guides/gitops-guide.md     - Flux setup & workflow
 
 ================================================================================
 CC. CI / REPO HYGIENE (3)
@@ -352,15 +352,16 @@ FOLDER STRUCTURE
   |   |-- cost-check.ps1
   |   |-- stop-lab.ps1
   |   |-- start-lab.ps1
-  |-- docs/
-  |   |-- lab-guide.md
-  |   |-- architecture.md
-  |   |-- monitoring-guide.md
-  |   |-- troubleshooting.md
-  |   |-- cost-optimization.md
-  |   |-- security-guide.md
-  |   |-- chaos-guide.md
-  |   |-- gitops-guide.md
+  |-- wiki/
+  |   |-- guides/
+  |   |   |-- lab-guide.md
+  |   |   |-- architecture.md
+  |   |   |-- monitoring-guide.md
+  |   |   |-- troubleshooting.md
+  |   |   |-- cost-optimization.md
+  |   |   |-- security-guide.md
+  |   |   |-- chaos-guide.md
+  |   |   |-- gitops-guide.md
   |-- .devcontainer/
   |   |-- devcontainer.json
   |-- .github/

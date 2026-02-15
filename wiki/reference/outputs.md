@@ -1,10 +1,22 @@
-# Outputs Reference
+<div align="center">
+  <img src="../images/wiki-reference.svg" alt="Reference" width="900"/>
+</div>
+
+<div align="center">
+
+[![Outputs](https://img.shields.io/badge/Outputs-9-blue?style=for-the-badge)](.) 
+[![Categories](https://img.shields.io/badge/Categories-4-green?style=for-the-badge)](.) 
+[![Format](https://img.shields.io/badge/Format-JSON%20%7C%20Text-orange?style=for-the-badge)](.) 
+
+</div>
+
+# 📤 Outputs Reference
 
 All Terraform outputs exported by the AKS Landing Zone Lab root module, defined in `outputs.tf`.
 
 ---
 
-## Cluster
+## ☸️ Cluster
 
 | Output | Type | Description | Example Value |
 |--------|------|-------------|---------------|
@@ -27,7 +39,7 @@ terraform output -raw kubeconfig_command | Invoke-Expression
 
 ---
 
-## Networking
+## 🌐 Networking
 
 | Output | Type | Description | Example Value |
 |--------|------|-------------|---------------|
@@ -49,7 +61,7 @@ terraform output spoke_vnet_id
 
 ---
 
-## Container Registry
+## 📦 Container Registry
 
 | Output | Type | Description | Example Value |
 |--------|------|-------------|---------------|
@@ -74,7 +86,7 @@ az aks check-acr -g rg-spoke-aks-networking-dev -n aks-akslab-dev --acr $acr
 
 ---
 
-## Monitoring
+## 📊 Monitoring
 
 | Output | Type | Description | Example Value |
 |--------|------|-------------|---------------|
@@ -94,7 +106,7 @@ if ($grafana) { Start-Process $grafana }
 
 ---
 
-## Output Sources
+## 📍 Output Sources
 
 Each output is sourced from a specific landing zone module:
 
@@ -112,7 +124,7 @@ Each output is sourced from a specific landing zone module:
 
 ---
 
-## Accessing Outputs
+## 💻 Accessing Outputs
 
 ```powershell
 # List all outputs
@@ -132,7 +144,7 @@ $acrServer = terraform output -raw acr_login_server
 
 ---
 
-## Downstream Usage
+## 🔗 Downstream Usage
 
 These outputs are commonly used in subsequent operations:
 
@@ -145,3 +157,11 @@ These outputs are commonly used in subsequent operations:
 | View Grafana dashboards | `grafana_endpoint` |
 | Verify VNet peering | `hub_vnet_id`, `spoke_vnet_id` |
 | Script automation | All outputs via `terraform output -json` |
+
+---
+
+<div align="center">
+
+**[&larr; Variables](variables.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Wiki Home](../README.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Naming Conventions](naming-conventions.md)**
+
+</div>

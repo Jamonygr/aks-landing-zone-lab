@@ -1,10 +1,22 @@
-# Troubleshooting Guide
+<div align="center">
+  <img src="../images/guide-troubleshooting.svg" alt="Troubleshooting Guide" width="900"/>
+</div>
 
-Common errors and resolutions for the AKS Landing Zone Lab.
+<div align="center">
+
+[![Terraform](https://img.shields.io/badge/Terraform-Fixes-purple?style=for-the-badge&logo=terraform)](.)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-Debug-blue?style=for-the-badge&logo=kubernetes)](.)
+[![Azure CLI](https://img.shields.io/badge/Azure_CLI-Solutions-orange?style=for-the-badge)](.)
+
+</div>
+
+# \ud83d\udd27 Troubleshooting Guide
+
+> **Quick fixes for common errors** — organized by category with symptoms, causes, and step-by-step resolutions.
 
 ---
 
-## Terraform Issues
+## \u2601\ufe0f Terraform Issues
 
 ### State Lock Error
 
