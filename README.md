@@ -41,43 +41,6 @@ Opinionated AKS platform lab built with Terraform and organized as landing zones
 
 ![Architecture overview](docs/images/architecture-overview.svg)
 
-```mermaid
-graph TB
-    INTERNET((Internet))
-
-    subgraph HUB["Hub VNet 10.0.0.0/16"]
-        HUB_MGMT["snet-management<br/>10.0.0.0/24"]
-        HUB_SHARED["snet-shared-services<br/>10.0.1.0/24"]
-        HUB_FW["AzureFirewallSubnet<br/>10.0.2.0/24 (optional)"]
-    end
-
-    subgraph SPOKE["Spoke VNet 10.1.0.0/16"]
-        SPOKE_SYS["snet-aks-system<br/>10.1.0.0/24"]
-        SPOKE_USER["snet-aks-user<br/>10.1.1.0/24"]
-        SPOKE_ING["snet-ingress<br/>10.1.2.0/24"]
-    end
-
-    subgraph AKS["AKS Cluster"]
-        SYSPOOL["System Node Pool"]
-        USERPOOL["User Node Pool"]
-        NGINX["NGINX Ingress"]
-    end
-
-    subgraph AZ["Azure Services"]
-        ACR["Azure Container Registry"]
-        LAW["Log Analytics"]
-        KV["Key Vault"]
-    end
-
-    HUB <-->|VNet peering| SPOKE
-    INTERNET --> SPOKE_ING --> NGINX --> USERPOOL
-    SPOKE_SYS --> SYSPOOL
-    SPOKE_USER --> USERPOOL
-    AKS --> ACR
-    AKS --> LAW
-    AKS --> KV
-```
-
 ![Deployment flow](docs/images/deployment-flow.svg)
 
 ## Quick Start
