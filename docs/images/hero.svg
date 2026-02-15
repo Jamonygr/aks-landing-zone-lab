@@ -1,71 +1,167 @@
-<svg width="1400" height="420" viewBox="0 0 1400 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="1400" height="480" viewBox="0 0 1400 480" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1400" y2="420" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0B2A40"/>
-      <stop offset="0.45" stop-color="#114A6A"/>
-      <stop offset="1" stop-color="#0F766E"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1400" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#020617"/>
+      <stop offset="0.35" stop-color="#0C2D48"/>
+      <stop offset="0.7" stop-color="#0E4D64"/>
+      <stop offset="1" stop-color="#0D9488"/>
     </linearGradient>
     <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#FFFFFF" stop-opacity="0.18"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop stop-color="#FFFFFF" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.04"/>
     </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#38BDF8" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="blur1" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="40"/>
+    </filter>
+    <filter id="blur2" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="60"/>
+    </filter>
   </defs>
 
-  <rect width="1400" height="420" rx="24" fill="url(#bg)"/>
+  <rect width="1400" height="480" rx="24" fill="url(#bg)"/>
 
-  <circle cx="1280" cy="74" r="130" fill="#38BDF8" fill-opacity="0.12"/>
-  <circle cx="210" cy="362" r="170" fill="#67E8F9" fill-opacity="0.10"/>
-  <circle cx="780" cy="40" r="90" fill="#A7F3D0" fill-opacity="0.10"/>
+  <!-- Ambient glow orbs -->
+  <circle cx="200" cy="400" r="200" fill="#06B6D4" fill-opacity="0.06" filter="url(#blur2)"/>
+  <circle cx="1200" cy="80" r="180" fill="#38BDF8" fill-opacity="0.08" filter="url(#blur2)"/>
+  <circle cx="700" cy="60" r="120" fill="#34D399" fill-opacity="0.06" filter="url(#blur1)"/>
+  <circle cx="1000" cy="420" r="140" fill="#818CF8" fill-opacity="0.05" filter="url(#blur2)"/>
 
-  <rect x="62" y="60" width="764" height="300" rx="20" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.28"/>
+  <!-- Subtle grid pattern -->
+  <g stroke="#FFFFFF" stroke-opacity="0.03" stroke-width="1">
+    <line x1="0" y1="80" x2="1400" y2="80"/>
+    <line x1="0" y1="160" x2="1400" y2="160"/>
+    <line x1="0" y1="240" x2="1400" y2="240"/>
+    <line x1="0" y1="320" x2="1400" y2="320"/>
+    <line x1="0" y1="400" x2="1400" y2="400"/>
+    <line x1="200" y1="0" x2="200" y2="480"/>
+    <line x1="400" y1="0" x2="400" y2="480"/>
+    <line x1="600" y1="0" x2="600" y2="480"/>
+    <line x1="800" y1="0" x2="800" y2="480"/>
+    <line x1="1000" y1="0" x2="1000" y2="480"/>
+    <line x1="1200" y1="0" x2="1200" y2="480"/>
+  </g>
 
-  <text x="100" y="132" fill="#E6FFFA" font-family="Segoe UI, Arial, sans-serif" font-size="46" font-weight="700">
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="1400" height="4" rx="2" fill="url(#glow)"/>
+
+  <!-- Kubernetes icon (simplified) -->
+  <g transform="translate(80,56)">
+    <circle cx="30" cy="30" r="28" fill="#326CE5" fill-opacity="0.3" stroke="#326CE5" stroke-opacity="0.6" stroke-width="2"/>
+    <path d="M30 10 L30 50 M14 20 L46 40 M46 20 L14 40" stroke="#93C5FD" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="30" cy="10" r="4" fill="#93C5FD"/>
+    <circle cx="30" cy="50" r="4" fill="#93C5FD"/>
+    <circle cx="14" cy="20" r="4" fill="#93C5FD"/>
+    <circle cx="46" cy="40" r="4" fill="#93C5FD"/>
+    <circle cx="46" cy="20" r="4" fill="#93C5FD"/>
+    <circle cx="14" cy="40" r="4" fill="#93C5FD"/>
+  </g>
+
+  <!-- Title block -->
+  <text x="150" y="84" fill="#F0FDFA" font-family="Segoe UI, Arial, sans-serif" font-size="52" font-weight="800" letter-spacing="-1">
     AKS Landing Zone Lab
   </text>
-  <text x="100" y="178" fill="#D1FAE5" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="500">
-    Terraform-driven Azure platform with hub-spoke networking,
+  <text x="82" y="130" fill="#99F6E4" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400" letter-spacing="0.5">
+    Production-grade Azure Kubernetes infrastructure as code
   </text>
-  <text x="100" y="214" fill="#D1FAE5" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="500">
-    AKS, governance, security controls, and day-2 operations scripts
+  <text x="82" y="162" fill="#5EEAD4" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" fill-opacity="0.7">
+    Hub-spoke networking  ·  Landing zones  ·  Security controls  ·  Day-2 operations
   </text>
 
-  <g transform="translate(100,248)">
-    <rect width="158" height="42" rx="11" fill="#0EA5E9" fill-opacity="0.26" stroke="#7DD3FC" stroke-opacity="0.8"/>
-    <text x="79" y="27" text-anchor="middle" fill="#E0F2FE" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">Hub-Spoke</text>
+  <!-- Feature pills row -->
+  <g transform="translate(82,192)">
+    <rect width="142" height="38" rx="19" fill="#0EA5E9" fill-opacity="0.2" stroke="#38BDF8" stroke-opacity="0.5"/>
+    <text x="71" y="25" text-anchor="middle" fill="#BAE6FD" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600">☁ Terraform</text>
   </g>
-  <g transform="translate(272,248)">
-    <rect width="128" height="42" rx="11" fill="#14B8A6" fill-opacity="0.24" stroke="#5EEAD4" stroke-opacity="0.8"/>
-    <text x="64" y="27" text-anchor="middle" fill="#CCFBF1" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">AKS</text>
+  <g transform="translate(238,192)">
+    <rect width="170" height="38" rx="19" fill="#8B5CF6" fill-opacity="0.2" stroke="#A78BFA" stroke-opacity="0.5"/>
+    <text x="85" y="25" text-anchor="middle" fill="#DDD6FE" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600">⎈ Kubernetes 1.32</text>
   </g>
-  <g transform="translate(414,248)">
-    <rect width="188" height="42" rx="11" fill="#22C55E" fill-opacity="0.22" stroke="#86EFAC" stroke-opacity="0.8"/>
-    <text x="94" y="27" text-anchor="middle" fill="#DCFCE7" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">Workload Identity</text>
+  <g transform="translate(422,192)">
+    <rect width="152" height="38" rx="19" fill="#14B8A6" fill-opacity="0.2" stroke="#5EEAD4" stroke-opacity="0.5"/>
+    <text x="76" y="25" text-anchor="middle" fill="#99F6E4" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600">🔒 Zero Trust</text>
   </g>
-  <g transform="translate(616,248)">
-    <rect width="168" height="42" rx="11" fill="#F59E0B" fill-opacity="0.24" stroke="#FDE68A" stroke-opacity="0.8"/>
-    <text x="84" y="27" text-anchor="middle" fill="#FEF3C7" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">Operations</text>
+  <g transform="translate(588,192)">
+    <rect width="142" height="38" rx="19" fill="#F59E0B" fill-opacity="0.2" stroke="#FCD34D" stroke-opacity="0.5"/>
+    <text x="71" y="25" text-anchor="middle" fill="#FDE68A" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600">📊 Monitoring</text>
+  </g>
+  <g transform="translate(744,192)">
+    <rect width="132" height="38" rx="19" fill="#22C55E" fill-opacity="0.2" stroke="#4ADE80" stroke-opacity="0.5"/>
+    <text x="66" y="25" text-anchor="middle" fill="#86EFAC" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600">🚀 GitOps</text>
   </g>
 
-  <g transform="translate(880,74)">
-    <rect width="460" height="274" rx="18" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-opacity="0.30"/>
-    <rect x="30" y="34" width="118" height="62" rx="10" fill="#0EA5E9" fill-opacity="0.28" stroke="#7DD3FC"/>
-    <text x="89" y="71" text-anchor="middle" fill="#E0F2FE" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">Hub VNet</text>
+  <!-- Architecture mini-diagram -->
+  <g transform="translate(860,40)">
+    <rect width="500" height="400" rx="18" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.15"/>
+    <text x="250" y="36" text-anchor="middle" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" letter-spacing="2">ARCHITECTURE</text>
 
-    <rect x="178" y="34" width="118" height="62" rx="10" fill="#22D3EE" fill-opacity="0.22" stroke="#67E8F9"/>
-    <text x="237" y="71" text-anchor="middle" fill="#ECFEFF" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">Spoke VNet</text>
+    <!-- Hub -->
+    <rect x="30" y="56" width="140" height="72" rx="10" fill="#0C4A6E" fill-opacity="0.6" stroke="#0EA5E9" stroke-opacity="0.6"/>
+    <text x="100" y="84" text-anchor="middle" fill="#BAE6FD" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">Hub VNet</text>
+    <text x="100" y="108" text-anchor="middle" fill="#7DD3FC" font-family="Segoe UI, Arial, sans-serif" font-size="12">10.0.0.0/16</text>
 
-    <rect x="326" y="34" width="104" height="62" rx="10" fill="#14B8A6" fill-opacity="0.24" stroke="#5EEAD4"/>
-    <text x="378" y="71" text-anchor="middle" fill="#CCFBF1" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600">AKS</text>
+    <!-- Arrow hub -> spoke -->
+    <line x1="170" y1="92" x2="196" y2="92" stroke="#38BDF8" stroke-width="2" stroke-dasharray="4,3"/>
+    <polygon points="196,88 204,92 196,96" fill="#38BDF8"/>
 
-    <line x1="148" y1="65" x2="178" y2="65" stroke="#BAE6FD" stroke-width="3"/>
-    <line x1="296" y1="65" x2="326" y2="65" stroke="#99F6E4" stroke-width="3"/>
+    <!-- Spoke -->
+    <rect x="206" y="56" width="140" height="72" rx="10" fill="#064E3B" fill-opacity="0.6" stroke="#10B981" stroke-opacity="0.6"/>
+    <text x="276" y="84" text-anchor="middle" fill="#A7F3D0" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">Spoke VNet</text>
+    <text x="276" y="108" text-anchor="middle" fill="#6EE7B7" font-family="Segoe UI, Arial, sans-serif" font-size="12">10.1.0.0/16</text>
 
-    <rect x="58" y="144" width="338" height="86" rx="12" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.28"/>
-    <text x="227" y="178" text-anchor="middle" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="600">
-      Security + Governance + Monitoring
-    </text>
-    <text x="227" y="206" text-anchor="middle" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="500">
-      Key Vault, Policies, Diagnostics, Alerts
-    </text>
+    <!-- Arrow spoke -> aks -->
+    <line x1="346" y1="92" x2="372" y2="92" stroke="#10B981" stroke-width="2" stroke-dasharray="4,3"/>
+    <polygon points="372,88 380,92 372,96" fill="#10B981"/>
+
+    <!-- AKS -->
+    <rect x="382" y="56" width="90" height="72" rx="10" fill="#312E81" fill-opacity="0.6" stroke="#818CF8" stroke-opacity="0.6"/>
+    <text x="427" y="84" text-anchor="middle" fill="#C7D2FE" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">AKS</text>
+    <text x="427" y="108" text-anchor="middle" fill="#A5B4FC" font-family="Segoe UI, Arial, sans-serif" font-size="12">K8s 1.32</text>
+
+    <!-- Landing zone cards -->
+    <rect x="30" y="156" width="140" height="52" rx="8" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <text x="100" y="180" text-anchor="middle" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600">🏗 Networking</text>
+    <text x="100" y="198" text-anchor="middle" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="10">NSGs · Routes · FW</text>
+
+    <rect x="180" y="156" width="140" height="52" rx="8" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <text x="250" y="180" text-anchor="middle" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600">🔐 Security</text>
+    <text x="250" y="198" text-anchor="middle" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="10">Key Vault · Policy</text>
+
+    <rect x="330" y="156" width="140" height="52" rx="8" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <text x="400" y="180" text-anchor="middle" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600">📈 Monitoring</text>
+    <text x="400" y="198" text-anchor="middle" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="10">Prometheus · Grafana</text>
+
+    <rect x="30" y="220" width="140" height="52" rx="8" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <text x="100" y="244" text-anchor="middle" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600">📋 Governance</text>
+    <text x="100" y="262" text-anchor="middle" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="10">Custom Policies</text>
+
+    <rect x="180" y="220" width="140" height="52" rx="8" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <text x="250" y="244" text-anchor="middle" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600">🪪 Identity</text>
+    <text x="250" y="262" text-anchor="middle" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="10">Workload ID · OIDC</text>
+
+    <rect x="330" y="220" width="140" height="52" rx="8" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <text x="400" y="244" text-anchor="middle" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600">⚙ Platform</text>
+    <text x="400" y="262" text-anchor="middle" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="10">ACR · Ingress · DNS</text>
+
+    <!-- Bottom stats bar -->
+    <rect x="30" y="300" width="440" height="72" rx="10" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <text x="90" y="330" text-anchor="middle" fill="#F0FDFA" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">6</text>
+    <text x="90" y="354" text-anchor="middle" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600">LANDING ZONES</text>
+    <line x1="155" y1="310" x2="155" y2="362" stroke="#334155"/>
+    <text x="220" y="330" text-anchor="middle" fill="#F0FDFA" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">12</text>
+    <text x="220" y="354" text-anchor="middle" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600">TF MODULES</text>
+    <line x1="285" y1="310" x2="285" y2="362" stroke="#334155"/>
+    <text x="350" y="330" text-anchor="middle" fill="#F0FDFA" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">76+</text>
+    <text x="350" y="354" text-anchor="middle" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600">RESOURCES</text>
+    <line x1="415" y1="310" x2="415" y2="362" stroke="#334155"/>
   </g>
+
+  <!-- Bottom accent -->
+  <rect x="80" y="430" width="300" height="1" fill="#38BDF8" fill-opacity="0.3"/>
+  <text x="82" y="458" fill="#475569" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="500">
+    Built with Terraform · Azure · Kubernetes
+  </text>
 </svg>
