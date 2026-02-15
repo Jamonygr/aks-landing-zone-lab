@@ -4,62 +4,42 @@
 
 The AKS Landing Zone Lab organizes infrastructure into **six landing zones**, each responsible for a specific domain. This mirrors the [Azure Cloud Adoption Framework landing zone model](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/) where platform capabilities are separated into independently deployable units.
 
-```mermaid
-graph TB
-    ROOT["Root Module (main.tf)"]
-
-    ROOT --> NET
-    ROOT --> AKS
-    ROOT --> MGMT
-    ROOT --> SEC
-    ROOT --> GOV
-    ROOT --> ID
-
-    subgraph NET["1. Networking"]
-        N1["Hub VNet + Subnets"]
-        N2["Spoke VNet + Subnets"]
-        N3["VNet Peering"]
-        N4["NSGs + Route Tables"]
-        N5["Azure Firewall (opt)"]
-    end
-
-    subgraph AKS["2. AKS Platform"]
-        A1["AKS Cluster"]
-        A2["System + User Node Pools"]
-        A3["Container Registry"]
-        A4["NGINX Ingress"]
-        A5["DNS Zone (opt)"]
-    end
-
-    subgraph MGMT["3. Management"]
-        M1["Log Analytics"]
-        M2["Container Insights"]
-        M3["Alert Rules"]
-        M4["Budget Alerts"]
-        M5["Prometheus + Grafana (opt)"]
-    end
-
-    subgraph SEC["4. Security"]
-        S1["Azure Policy (Baseline)"]
-        S2["Key Vault + CSI Driver"]
-        S3["Defender (opt)"]
-    end
-
-    subgraph GOV["5. Governance"]
-        G1["Custom Policy: No Limits"]
-        G2["Custom Policy: ACR Only"]
-    end
-
-    subgraph ID["6. Identity"]
-        I1["Workload Identity"]
-        I2["Federated Credentials"]
-        I3["Managed Identities"]
-    end
-
-    NET --> AKS --> MGMT
-    AKS --> SEC
-    AKS --> GOV
-    AKS --> ID
+```
+                     ┌────────────────────────┐
+                     │  Root Module (main.tf) │
+                     └────────────┬───────────┘
+                                │
+         ┌──────────────────┼───────────────────┐
+         ▼                    ▼                   ▼
+  ┌──────────────────┐ ...               ...
+  │ 1. Networking      │
+  │                    │  All six landing zones are
+  │ Hub VNet + Subnets │  invoked from the root module.
+  │ Spoke VNet + Snet  │
+  │ VNet Peering       │  Dependency chain:
+  │ NSGs + Route Tbl   │
+  │ Firewall (opt)     │  Networking ─▶ AKS Platform ─┬─▶ Management
+  └─────────┬────────┘                          ├─▶ Security
+            │                                    ├─▶ Governance
+            ▼                                    └─▶ Identity
+  ┌──────────────────┐
+  │ 2. AKS Platform    │  ┌──────────────────┐  ┌──────────────────┐
+  │                    │  │ 3. Management      │  │ 4. Security        │
+  │ AKS Cluster        │  │                    │  │                    │
+  │ System + User Pool │  │ Log Analytics      │  │ Azure Policy       │
+  │ Container Registry │  │ Container Insights │  │ Key Vault + CSI    │
+  │ NGINX Ingress      │  │ Alert Rules        │  │ Defender (opt)     │
+  │ DNS Zone (opt)     │  │ Budget Alerts      │  └──────────────────┘
+  └──────────────────┘  │ Prometheus (opt)   │
+                          └──────────────────┘  ┌──────────────────┐
+                                                 │ 5. Governance      │
+  ┌──────────────────┐                          │                    │
+  │ 6. Identity        │                          │ Deny No Limits     │
+  │                    │                          │ Enforce ACR Source │
+  │ Workload Identity  │                          └──────────────────┘
+  │ Federated Creds    │
+  │ Managed Identities │
+  └──────────────────┘
 ```
 
 ---

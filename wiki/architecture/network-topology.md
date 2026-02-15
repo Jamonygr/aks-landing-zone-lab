@@ -4,41 +4,37 @@
 
 The lab implements a hub-spoke network topology — the [recommended pattern](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/hybrid-networking/hub-spoke) for enterprise Azure deployments.
 
-```mermaid
-graph TB
-    Internet((Internet))
-
-    subgraph HubRG["rg-hub-networking-{env}"]
-        subgraph HubVNet["Hub VNet — 10.0.0.0/16"]
-            MGT["snet-management<br/>10.0.0.0/24"]
-            SS["snet-shared-services<br/>10.0.1.0/24"]
-            FWSN["AzureFirewallSubnet<br/>10.0.2.0/24"]
-        end
-        FW["Azure Firewall<br/>(optional)"]
-    end
-
-    subgraph SpokeRG["rg-spoke-aks-networking-{env}"]
-        subgraph SpokeVNet["Spoke VNet — AKS — 10.1.0.0/16"]
-            SYS["snet-aks-system<br/>10.1.0.0/24"]
-            USR["snet-aks-user<br/>10.1.1.0/24"]
-            ING["snet-ingress<br/>10.1.2.0/24"]
-        end
-    end
-
-    subgraph AKSCluster["AKS Cluster"]
-        SysPool["System Pool<br/>Standard_B2s<br/>1-2 nodes"]
-        UserPool["User Pool<br/>Standard_B2s<br/>1-3 nodes"]
-        NGINX["NGINX Ingress"]
-    end
-
-    Internet -->|HTTP/HTTPS| ING
-    ING --- NGINX
-    SYS --- SysPool
-    USR --- UserPool
-    FWSN --- FW
-
-    HubVNet -->|"VNet Peering"| SpokeVNet
-    SpokeVNet -->|"VNet Peering"| HubVNet
+```
+                            ┌──────────────┐
+                            │   Internet   │
+                            └──────┬───────┘
+                                   │ HTTP/HTTPS
+                                   ▼
+  rg-spoke-aks-networking-{env}
+  ┌───────────────────────────────────────────────────────────────┐
+  │  Spoke VNet — AKS (10.1.0.0/16)                                 │
+  │                                                                 │
+  │  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐ │
+  │  │ snet-aks-system  │ │ snet-aks-user    │ │ snet-ingress    │ │
+  │  │ 10.1.0.0/24      │ │ 10.1.1.0/24      │ │ 10.1.2.0/24     │ │
+  │  │                  │ │                  │ │                  │ │
+  │  │ System Pool      │ │ User Pool        │ │ NGINX Ingress   │ │
+  │  │ B2s, 1-2 nodes   │ │ B2s, 1-3 nodes   │ │                  │ │
+  │  └──────────────────┘ └──────────────────┘ └──────────────────┘ │
+  └──────────────────────────┬────────────────────────────────────┘
+                             │ VNet Peering (bidirectional)
+                             ▼
+  rg-hub-networking-{env}
+  ┌───────────────────────────────────────────────────────────────┐
+  │  Hub VNet (10.0.0.0/16)                                        │
+  │                                                                 │
+  │  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐ │
+  │  │ snet-management  │ │ snet-shared-svc  │ │ AzureFirewall   │ │
+  │  │ 10.0.0.0/24      │ │ 10.0.1.0/24      │ │ Subnet          │ │
+  │  └──────────────────┘ └──────────────────┘ │ 10.0.2.0/24     │ │
+  │                                              │ Firewall (opt)  │ │
+  │                                              └──────────────────┘ │
+  └───────────────────────────────────────────────────────────────┘
 ```
 
 ### Why Hub-Spoke?

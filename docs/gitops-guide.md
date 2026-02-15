@@ -14,34 +14,30 @@ GitOps is an operational model where the desired state of the cluster is declare
 
 ## Flux v2 Architecture
 
-```mermaid
-graph LR
-    subgraph Git["Git Repository"]
-        REPO["AKS repo<br/>k8s/ directory"]
-    end
-
-    subgraph Flux["Flux Controllers (flux-system namespace)"]
-        SC["Source Controller"]
-        KC["Kustomize Controller"]
-        NC["Notification Controller"]
-    end
-
-    subgraph Cluster["AKS Cluster"]
-        NS["Namespaces"]
-        APPS["Deployments"]
-        SVC["Services"]
-        ING["Ingress"]
-    end
-
-    subgraph Notify["Notifications"]
-        WH["Webhook / Slack"]
-    end
-
-    REPO -->|poll every 1m| SC
-    SC -->|artifact| KC
-    KC -->|apply manifests| Cluster
-    KC -->|reconciliation events| NC
-    NC -->|send alerts| WH
+```
+  ┌─────────────────┐      ┌──────────────────────────────────┐
+  │  Git Repository  │      │  Flux Controllers                │
+  │                  │      │  (flux-system namespace)          │
+  │  AKS repo        │      │                                  │
+  │  k8s/ directory   │─────▶│  Source Controller               │
+  │                  │poll   │       │                          │
+  └─────────────────┘1m     │       ▼ artifact                 │
+                            │  Kustomize Controller            │
+                            │       │         │                │
+                            │       │         ▼                │
+                            │       │  Notification Controller │
+                            └───────┼──────────┼───────────────┘
+                                    │          │
+                           apply    │          │ send alerts
+                         manifests  ▼          ▼
+                     ┌────────────────┐  ┌──────────────┐
+                     │  AKS Cluster   │  │ Notifications│
+                     │                │  │              │
+                     │  Namespaces    │  │ Webhook      │
+                     │  Deployments   │  │ Slack        │
+                     │  Services      │  └──────────────┘
+                     │  Ingress       │
+                     └────────────────┘
 ```
 
 ### Flux Components

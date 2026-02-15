@@ -6,22 +6,24 @@ The AKS Landing Zone Lab implements an enterprise-grade Azure Kubernetes Service
 
 The architecture is organized around **landing zones** — purpose-built environments that provide specific capabilities:
 
-```mermaid
-graph TB
-    ROOT["Root Module<br/>(main.tf)"]
-
-    ROOT --> NET["Networking<br/>Landing Zone"]
-    ROOT --> AKS["AKS Platform<br/>Landing Zone"]
-    ROOT --> MGMT["Management<br/>Landing Zone"]
-    ROOT --> SEC["Security<br/>Landing Zone"]
-    ROOT --> GOV["Governance<br/>Landing Zone"]
-    ROOT --> ID["Identity<br/>Landing Zone"]
-
-    NET --> AKS
-    AKS --> MGMT
-    AKS --> SEC
-    AKS --> GOV
-    AKS --> ID
+```
+                    ┌────────────────────────┐
+                    │  Root Module (main.tf) │
+                    └────────────┬───────────┘
+                               │
+          ┌───────────┬───────┼───────┬─────────┬────────┐
+          ▼           ▼       ▼       ▼         ▼        ▼
+   ┌──────────┐ ┌──────┐ ┌────┐ ┌────────┐ ┌──────┐ ┌───────┐
+   │Networking│ │ AKS  │ │Mgmt│ │Security│ │ Gov  │ │  ID   │
+   └────┬─────┘ └──┬───┘ └────┘ └────────┘ └──────┘ └───────┘
+        │          │
+        └─────────▶│ (Networking feeds into AKS Platform)
+                   │
+        AKS Platform feeds into:
+          ├──▶ Management
+          ├──▶ Security
+          ├──▶ Governance
+          └──▶ Identity
 ```
 
 Each landing zone is an independent Terraform module in `landing-zones/` that consumes reusable modules from `modules/`.
@@ -47,13 +49,11 @@ Each landing zone is an independent Terraform module in `landing-zones/` that co
 
 ## Infrastructure Dependencies
 
-```mermaid
-graph LR
-    NET["1. Networking"] --> AKS_P["2. AKS Platform"]
-    AKS_P --> MGMT["3. Management"]
-    AKS_P --> SEC["4. Security"]
-    AKS_P --> GOV["5. Governance"]
-    AKS_P --> ID["6. Identity"]
+```
+  1. Networking ──▶ 2. AKS Platform ──┬──▶ 3. Management
+                                     ├──▶ 4. Security
+                                     ├──▶ 5. Governance
+                                     └──▶ 6. Identity
 ```
 
 Landing zones are deployed in order, with each zone depending on outputs from previous zones:

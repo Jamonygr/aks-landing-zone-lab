@@ -4,39 +4,26 @@
 
 The AKS Landing Zone Lab implements security across six layers, each providing independent protection:
 
-```mermaid
-graph TB
-    subgraph L1["Layer 1: Network Perimeter"]
-        NSG["NSGs per Subnet"]
-        FW["Azure Firewall<br/>(optional)"]
-    end
-
-    subgraph L2["Layer 2: Cluster Network"]
-        CALICO["Calico Network Policies"]
-        DNS["Default-Deny + Allow Rules"]
-    end
-
-    subgraph L3["Layer 3: Pod Security"]
-        PSA["Pod Security Admission"]
-        LIMITS["Resource Limits/Quotas"]
-    end
-
-    subgraph L4["Layer 4: Secrets Management"]
-        KV["Azure Key Vault"]
-        CSI["CSI Secrets Store Driver"]
-    end
-
-    subgraph L5["Layer 5: Governance"]
-        POLICY["Azure Policy"]
-        CUSTOM["Custom Policy Definitions"]
-    end
-
-    subgraph L6["Layer 6: Runtime Protection"]
-        DEFENDER["Defender for Containers<br/>(optional)"]
-        AUDIT["Audit Logging"]
-    end
-
-    L1 --> L2 --> L3 --> L4 --> L5 --> L6
+```
+  ┌────────────────────────────────────────────────────────┐
+  │  Layer 1: Network Perimeter                          │
+  │    NSGs per Subnet  ·  Azure Firewall (optional)      │
+  ├────────────────────────────────────────────────────────┤
+  │  Layer 2: Cluster Network                             │
+  │    Calico Network Policies  ·  Default-Deny + Allows  │
+  ├────────────────────────────────────────────────────────┤
+  │  Layer 3: Pod Security                                │
+  │    Pod Security Admission  ·  Resource Limits/Quotas  │
+  ├────────────────────────────────────────────────────────┤
+  │  Layer 4: Secrets Management                          │
+  │    Azure Key Vault  ·  CSI Secrets Store Driver        │
+  ├────────────────────────────────────────────────────────┤
+  │  Layer 5: Governance                                  │
+  │    Azure Policy  ·  Custom Policy Definitions          │
+  ├────────────────────────────────────────────────────────┤
+  │  Layer 6: Runtime Protection                          │
+  │    Defender for Containers (opt)  ·  Audit Logging     │
+  └────────────────────────────────────────────────────────┘
 ```
 
 ---

@@ -6,46 +6,35 @@ This project implements an enterprise-grade AKS deployment following the Azure [
 
 ## Network Topology
 
-```mermaid
-graph TB
-    Internet((Internet))
+```
+                              ┌──────────────┐
+                              │   Internet   │
+                              └──────┬───────┘
+                                     │ HTTP/HTTPS
+                                     ▼
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │  Spoke VNet — AKS (10.1.0.0/16)                                    │
+  │                                                                     │
+  │  ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐  │
+  │  │ snet-aks-system   │ │ snet-aks-user     │ │ snet-ingress      │  │
+  │  │ 10.1.0.0/24       │ │ 10.1.1.0/24       │ │ 10.1.2.0/24       │  │
+  │  │                   │ │                   │ │                   │  │
+  │  │  System Pool      │ │  User Pool        │ │  NGINX Ingress    │  │
+  │  │  B2s, 1-2 nodes   │ │  B2s, 1-3 nodes   │ │  Controller       │  │
+  │  └───────────────────┘ └───────────────────┘ └───────────────────┘  │
+  └────────────────────────────┬────────────────────────────────────────┘
+                               │ VNet Peering (bidirectional)
+                               ▼
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │  Hub VNet (10.0.0.0/16)                                            │
+  │                                                                     │
+  │  ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐  │
+  │  │ snet-management   │ │ snet-shared-svc   │ │ AzureFirewallSnet │  │
+  │  │ 10.0.0.0/24       │ │ 10.0.1.0/24       │ │ 10.0.2.0/24       │  │
+  │  └───────────────────┘ └───────────────────┘ └───────────────────┘  │
+  └─────────────────────────────────────────────────────────────────────┘
 
-    subgraph Hub["Hub VNet (10.0.0.0/16)"]
-        MGT["snet-management<br/>10.0.0.0/24"]
-        SS["snet-shared-services<br/>10.0.1.0/24"]
-        FW["AzureFirewallSubnet<br/>10.0.2.0/24"]
-    end
-
-    subgraph Spoke["Spoke VNet - AKS (10.1.0.0/16)"]
-        SYS["snet-aks-system<br/>10.1.0.0/24"]
-        USR["snet-aks-user<br/>10.1.1.0/24"]
-        ING["snet-ingress<br/>10.1.2.0/24"]
-    end
-
-    subgraph AKS["AKS Cluster"]
-        SP["System Pool<br/>B2s, 1-2 nodes"]
-        UP["User Pool<br/>B2s, 1-3 nodes"]
-        NGINX["NGINX Ingress<br/>Controller"]
-    end
-
-    subgraph Services["Azure Services"]
-        ACR["Container<br/>Registry"]
-        KV["Key Vault"]
-        LAW["Log Analytics<br/>Workspace"]
-    end
-
-    Internet --> ING
-    ING --> NGINX
-    NGINX --> UP
-    SYS --- SP
-    USR --- UP
-
-    Hub -->|VNet Peering| Spoke
-    Spoke -->|VNet Peering| Hub
-
-    AKS --> ACR
-    AKS --> KV
-    AKS --> LAW
+  Azure Services:  Container Registry  ·  Key Vault  ·  Log Analytics
 ```
 
 ## IP Addressing Plan
@@ -80,56 +69,32 @@ graph TB
 
 ## Component Architecture
 
-```mermaid
-graph LR
-    subgraph LZ_NET["Landing Zone: Networking"]
-        HUB[Hub VNet]
-        SPOKE[Spoke VNet]
-        PEER[VNet Peering]
-        NSG[NSGs]
-        RT[Route Tables]
-        FW_OPT[Firewall<br/>optional]
-    end
-
-    subgraph LZ_AKS["Landing Zone: AKS Platform"]
-        AKS[AKS Cluster]
-        ACR[Container Registry]
-        ING[NGINX Ingress]
-        DNS_OPT[DNS Zone<br/>optional]
-    end
-
-    subgraph LZ_MGMT["Landing Zone: Management"]
-        LAW[Log Analytics]
-        CI[Container Insights]
-        ALERTS[Alert Rules]
-        BUDGET[Budget Alerts]
-        PROM[Prometheus<br/>optional]
-        GRAF[Grafana<br/>optional]
-    end
-
-    subgraph LZ_SEC["Landing Zone: Security"]
-        POLICY[Azure Policy]
-        DEFENDER[Defender<br/>optional]
-        KV[Key Vault]
-        CSI[CSI Secrets Store]
-    end
-
-    subgraph LZ_GOV["Landing Zone: Governance"]
-        POL_LIMITS[Deny No Limits]
-        POL_ACR[Enforce ACR Source]
-    end
-
-    subgraph LZ_ID["Landing Zone: Identity"]
-        WI[Workload Identity]
-        FIC[Federated Credentials]
-        MI[Managed Identities]
-    end
-
-    LZ_NET --> LZ_AKS
-    LZ_AKS --> LZ_MGMT
-    LZ_AKS --> LZ_SEC
-    LZ_AKS --> LZ_GOV
-    LZ_AKS --> LZ_ID
+```
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                        Root Module (main.tf)                     │
+  └──────────────────────────┬───────────────────────────────────────┘
+                             │
+       ┌─────────────────────┼─────────────────────────┐
+       ▼                     ▼                         ▼
+  ┌──────────┐      ┌──────────────┐           ┌─────────────┐
+  │Networking│─────▶│ AKS Platform │──────┬───▶│ Management  │
+  │          │      │              │      │    │             │
+  │Hub VNet  │      │AKS Cluster   │      │    │Log Analytics│
+  │Spoke VNet│      │ACR           │      │    │Insights     │
+  │Peering   │      │NGINX Ingress │      │    │Alerts       │
+  │NSGs      │      │DNS Zone (opt)│      │    │Prometheus   │
+  │Route Tbl │      └──────────────┘      │    └─────────────┘
+  │Firewall  │             │              │
+  └──────────┘       ┌─────┼──────┐       │
+                     ▼     ▼      ▼       │
+              ┌────────┐┌─────┐┌────────┐ │
+              │Security││ Gov ││Identity│ │
+              │        ││     ││        │ │
+              │Policy  ││Deny ││Workload│ │
+              │Key Vlt ││No   ││Identity│ │
+              │Defender││Lmts ││Fed Cred│ │
+              │CSI     ││ACR  ││Mgd ID  │ │
+              └────────┘└─────┘└────────┘ │
 ```
 
 ## Landing Zone Descriptions
