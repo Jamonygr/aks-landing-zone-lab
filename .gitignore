@@ -21,3 +21,12 @@ crash.*.log
 # Local CLI config
 .terraformrc
 terraform.rc
+
+# App build/dependency artifacts
+app/node_modules/
+app/.next/
+
+# Local plan and run outputs
+tfplan*
+*.log
+.tmp_*
