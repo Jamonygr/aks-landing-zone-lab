@@ -79,7 +79,7 @@ The infrastructure is organized into **seven landing zones** (the data zone is o
 </td>
 </tr>
 <tr>
-<td>
+<td colspan="3">
 
 **🗄 Data (Optional)**
 > Azure SQL Database, private endpoint + private DNS, Key Vault connection string secret

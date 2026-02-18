@@ -4,196 +4,131 @@
 
 <div align="center">
 
-[![Budget](https://img.shields.io/badge/Budget-~$80--100/mo-green?style=for-the-badge)](.)
-[![Savings](https://img.shields.io/badge/With_Stop/Start-~$55--75/mo-blue?style=for-the-badge)](.)
-[![Toggles](https://img.shields.io/badge/Feature_Toggles-10-orange?style=for-the-badge)](.)
+[![Budget](https://img.shields.io/badge/Budget-Dev_First-green?style=for-the-badge)](.)
+[![Savings](https://img.shields.io/badge/Best_Action-Stop/Start-blue?style=for-the-badge)](.)
+[![Focus](https://img.shields.io/badge/Goal-Lab_Cost_Control-orange?style=for-the-badge)](.)
 
 </div>
 
-# \ud83d\udcb0 Cost Optimization Guide
+# 💰 Cost Optimization Guide
 
-> **Keep your Azure bill under control** — budget management, stop/start automation, and feature toggles for cost-effective AKS learning.
-
----
-
-## \ud83d\udcca Budget Overview
-
-The AKS Landing Zone Lab is designed for a **monthly budget of ~$80–100** with all optional toggles OFF, or **~$55–75** using stop/start scripts.
-
-### Cost Breakdown (Dev Defaults, Always-On)
-
-| Resource | SKU | Monthly Cost | Notes |
-|----------|-----|-------------|-------|
-| AKS Cluster (control plane) | Free tier | $0.00 | Free for standard usage |
-| System Node Pool (1× B2s) | Standard_B2s | ~$30.00 | 2 vCPU, 4 GB RAM |
-| User Node Pool (1× B2s) | Standard_B2s | ~$30.00 | 2 vCPU, 4 GB RAM |
-| OS Disks (2× 30 GB) | Standard_LRS | ~$3.00 | Per node |
-| Public IP (Ingress) | Standard SKU | ~$3.60 | Static allocation |
-| Log Analytics Workspace | PerGB2018 | ~$5.00 | ~2 GB/day at $2.76/GB |
-| Container Registry | Basic SKU | ~$5.00 | 10 GB storage included |
-| Key Vault | Standard | ~$0.00 | Pay per operation (minimal) |
-| Load Balancer | Standard | ~$0.00 | Included with AKS |
-| NSG Flow Logs | Standard | ~$1.00 | Low traffic volume |
-| **Subtotal** | | **~$78** | |
-
-### Optional Toggles Cost Impact
-
-| Toggle | Variable | Monthly Cost | Default |
-|--------|----------|-------------|---------|
-| Azure Firewall (Basic) | `enable_firewall` | +$900.00 | OFF |
-| Managed Prometheus | `enable_managed_prometheus` | +$0–5.00 | OFF |
-| Managed Grafana | `enable_managed_grafana` | +$10.00 | OFF |
-| Defender for Containers | `enable_defender` | +$7.00/node | OFF |
-| Azure DNS Zone | `enable_dns_zone` | +$0.50 | OFF |
-| KEDA | `enable_keda` | Free | OFF |
-| Azure Files StorageClass | `enable_azure_files` | +$1.00 | OFF |
-| Application Insights | `enable_app_insights` | +$0–5.00 | OFF |
-
-### Cost Scenarios
-
-| Scenario | Monthly Cost |
-|----------|-------------|
-| Dev defaults, always-on | ~$80–100 |
-| Dev defaults, stop nights & weekends | ~$55–75 |
-| Lab env (monitoring ON, firewall OFF) | ~$105–130 |
-| All toggles ON excluding Firewall | ~$105–130 |
-| All toggles ON including Firewall | ~$1,000+ |
+Cost control practices aligned to current environment configs (`dev`, `lab`, `prod`).
 
 ---
 
-## Stop/Start Schedule
+## 1. Environment Cost Shape
 
-The single most effective cost-saving measure is stopping the AKS cluster when not in use. Stopping the cluster deallocates the node VMs, eliminating compute charges.
+Current tfvars intent:
+- `dev`: minimal baseline, optional features mostly off
+- `lab`: Prometheus/Grafana + DNS + SQL enabled
+- `prod`: firewall + defender + advanced features enabled
 
-### Recommended Schedule
-
-| Period | Action | Savings |
-|--------|--------|---------|
-| Weeknights (6 PM – 8 AM) | Stop cluster | ~58% of compute |
-| Weekends (Fri 6 PM – Mon 8 AM) | Stop cluster | ~29% of compute |
-| **Combined** | Stop nights + weekends | **~70% of compute** |
-
-### Using the Scripts
+Use this as your primary cost lever:
 
 ```powershell
-# Stop the cluster (saves ~$2/day in compute)
-.\scripts\stop-lab.ps1
-
-# Start the cluster
-.\scripts\start-lab.ps1
-```
-
-### Automating Stop/Start
-
-You can schedule these using Windows Task Scheduler or Azure Automation:
-
-**Windows Task Scheduler**:
-```powershell
-# Create a scheduled task to stop the cluster at 6 PM daily
-$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File C:\Users\Jamon\Documents\GitHub\AKS\scripts\stop-lab.ps1"
-$trigger = New-ScheduledTaskTrigger -Daily -At "6:00PM"
-Register-ScheduledTask -TaskName "AKS-Lab-Stop" -Action $action -Trigger $trigger -Description "Stop AKS lab cluster"
-
-# Create a scheduled task to start the cluster at 8 AM daily (weekdays only)
-$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File C:\Users\Jamon\Documents\GitHub\AKS\scripts\start-lab.ps1"
-$trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Monday,Tuesday,Wednesday,Thursday,Friday -At "8:00AM"
-Register-ScheduledTask -TaskName "AKS-Lab-Start" -Action $action -Trigger $trigger -Description "Start AKS lab cluster"
-```
-
-> **Note**: When the cluster is stopped, `kubectl` commands will fail. Start the cluster before running any lab exercises.
-
----
-
-## Cost-Saving Tips
-
-### 1. Use Dev Environment Defaults
-The `environments/dev.tfvars` disables all optional toggles. Only enable toggles you are actively using for a lab exercise.
-
-```powershell
-# Deploy with dev defaults
 .\scripts\deploy.ps1 -Environment dev
 ```
 
-### 2. Minimize Node Count
-Keep `system_node_pool_min = 1` and `user_node_pool_min = 1`. The Cluster Autoscaler will add nodes only when needed.
+---
 
-### 3. Cap Log Analytics Ingestion
-Set a daily ingestion cap to prevent runaway log costs:
+## 2. Optional Feature Cost Drivers
 
-```hcl
-# In the management landing zone
-log_analytics_daily_quota_gb = 1  # Cap at 1 GB/day (~$2.76/day max)
-```
+| Feature | Variable | Typical Impact |
+|---------|----------|----------------|
+| Azure Firewall (Basic) | `enable_firewall` | Very high |
+| Defender for Containers | `enable_defender` | Per-node add-on |
+| Managed Grafana | `enable_managed_grafana` | Low/medium |
+| Managed Prometheus | `enable_managed_prometheus` | Low/medium depending on ingest |
+| DNS Zone | `enable_dns_zone` | Low |
+| SQL Database | `enable_sql_database` | Low/medium |
 
-### 4. Avoid Azure Firewall
-Azure Firewall Basic costs ~$900/month. Use it only when specifically studying firewall rules. For lab purposes, NAT gateway or default outbound access is sufficient.
+No direct current deployment impact (reserved root vars):
+- `enable_keda`
+- `enable_azure_files`
+- `enable_app_insights`
 
-### 5. Clean Up Test Resources
-After each lab day, remove workloads that generate unnecessary cost:
-
-```powershell
-# Remove stress test pods
-kubectl delete -f k8s/apps/stress-cpu.yaml --ignore-not-found
-kubectl delete -f k8s/apps/stress-memory.yaml --ignore-not-found
-
-# Remove chaos experiments
-kubectl delete -f k8s/chaos/ --ignore-not-found
-```
-
-### 6. Monitor Costs Regularly
-
-```powershell
-# Run the cost check script weekly
-.\scripts\cost-check.ps1
-```
-
-Also set up the budget alert to notify you:
-```hcl
-budget_amount = 100  # Alert at $100
-alert_email   = "your-email@example.com"
-```
-
-### 7. Use Burstable VM Sizes
-The default `Standard_B2s` VMs are burstable, meaning they accumulate CPU credits during idle periods and burst above baseline during load. This is ideal for lab workloads with intermittent usage patterns.
+Routing note:
+- `route_internet_via_firewall` only changes egress path when firewall exists; it is not a standalone cost feature.
 
 ---
 
-## Teardown Checklist
+## 3. Highest ROI Action: Stop/Start
 
-When you are finished with the lab or want to reset:
+When not actively using the lab:
 
-### Quick Teardown (Workloads Only)
+```powershell
+.\scripts\stop-lab.ps1
+```
+
+Resume:
+
+```powershell
+.\scripts\start-lab.ps1
+```
+
+Automate with Task Scheduler for nights/weekends if this is your regular cadence.
+
+---
+
+## 4. Monitor Spend
+
+Use the built-in script:
+
+```powershell
+.\scripts\cost-check.ps1 -Environment dev
+.\scripts\cost-check.ps1 -Environment lab
+```
+
+This script reads `budget_amount` from the selected env tfvars unless explicitly overridden.
+
+---
+
+## 5. Budgeting Behavior In Terraform
+
+Management landing zone config creates a resource-group budget:
+- amount: `budget_amount`
+- notifications at 80% actual and 100% forecasted
+- contact: `alert_email`
+
+Set explicitly in env tfvars:
+
+```hcl
+budget_amount = 100
+alert_email   = "admin@example.com"
+```
+
+---
+
+## 6. Practical Cost Checklist
+
+- Prefer `dev` unless testing a specific feature
+- Stop cluster after each lab session
+- Keep firewall/defender off outside dedicated exercises
+- Remove stress/chaos workloads after testing
+- Periodically run `scripts/cost-check.ps1`
+- Destroy environments you are not using
+
+---
+
+## 7. Teardown
+
+Workloads only:
+
 ```powershell
 .\scripts\cleanup-workloads.ps1
 ```
 
-### Full Teardown (All Azure Resources)
+Full infrastructure:
+
 ```powershell
-# 1. Destroy all infrastructure
 .\scripts\destroy.ps1 -Environment dev
-
-# 2. Verify resource groups are deleted
-az group list --query "[?tags.project=='akslab']" -o table
-
-# 3. Check for orphaned resources not tagged
-az resource list -o table | Select-String "akslab"
-
-# 4. Remove the Terraform state backend (optional - only if fully done)
-az group delete --name rg-terraform-state --yes
-
-# 5. Clean up local kubeconfig context
-kubectl config delete-context aks-akslab-dev
-kubectl config delete-cluster aks-akslab-dev
-kubectl config delete-user clusterUser_rg-spoke-aks-networking-dev_aks-akslab-dev
+az resource list --tag project=akslab -o table
 ```
 
-### Post-Teardown Verification
+---
 
-| Check | Command | Expected |
-|-------|---------|----------|
-| No resource groups | `az group list --query "[?tags.project=='akslab']" -o table` | Empty |
-| No orphaned resources | `az resource list --tag project=akslab -o table` | Empty |
-| No running costs | Azure Portal → Cost Management → Cost analysis | $0 from teardown date |
-| Kubeconfig clean | `kubectl config get-contexts` | No akslab contexts |
+<div align="center">
 
-> **Important**: Azure charges may continue for 1–2 days after resource deletion due to billing cycle lag. Verify in Cost Management after 48 hours.
+**[⬅ Wiki Home](../README.md)** · **[Troubleshooting](troubleshooting.md)**
+
+</div>

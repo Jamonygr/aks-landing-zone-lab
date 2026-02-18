@@ -48,7 +48,7 @@ Before starting any lab day, ensure the following tools are installed:
 |------|---------|---------|
 | Azure CLI | 2.x+ | `winget install Microsoft.AzureCLI` |
 | Terraform | 1.5+ | `winget install Hashicorp.Terraform` |
-| kubectl | 1.29+ | `az aks install-cli` |
+| kubectl | 1.32+ | `az aks install-cli` |
 | Helm | 3.x+ | `winget install Helm.Helm` |
 | Git | 2.x+ | `winget install Git.Git` |
 | PowerShell | 5.1+ | Built-in on Windows |
@@ -120,11 +120,11 @@ az group list --query "[?tags.project=='akslab']" -o table
 ### Verification Checklist
 - [ ] Bootstrap script shows all green checks
 - [ ] `terraform apply` completes without errors
-- [ ] Resource groups `rg-hub-networking-dev`, `rg-spoke-aks-networking-dev`, `rg-management-dev`, `rg-security-dev` exist
+- [ ] Resource groups `rg-hub-networking-dev`, `rg-spoke-aks-networking-dev`, `rg-management-dev`, `rg-security-dev`, `rg-governance-dev`, and `rg-identity-dev` exist
 - [ ] AKS cluster `aks-akslab-dev` is in `Succeeded` state
 
 ### Expected Outcome
-Three resource groups created with hub VNet, spoke VNet, AKS cluster, ACR, Log Analytics workspace, and Key Vault.
+Core landing-zone resource groups created with hub/spoke networking, AKS, management, security, governance, and identity resources.
 
 ---
 
@@ -169,6 +169,7 @@ az network vnet subnet list --resource-group rg-spoke-aks-networking-dev --vnet-
 | snet-aks-system | 10.1.0.0/24 | AKS system node pool |
 | snet-aks-user | 10.1.1.0/24 | AKS user node pool |
 | snet-ingress | 10.1.2.0/24 | NGINX ingress controller |
+| snet-private-endpoints | 10.1.3.0/24 | Private endpoints (for optional SQL/data services) |
 
 #### 2.3 Verify VNet Peering
 
@@ -205,9 +206,9 @@ kubectl delete pod dns-test
 
 ### Verification Checklist
 - [ ] Hub VNet has 3 subnets in the 10.0.x.0/24 range
-- [ ] Spoke VNet has 3 subnets in the 10.1.x.0/24 range
+- [ ] Spoke VNet has 4 subnets in the 10.1.x.0/24 range
 - [ ] Both peerings show `Connected` state
-- [ ] NSGs have deny-all-inbound as lowest priority rule
+- [ ] NSGs are associated to AKS system, AKS user, ingress, and private-endpoint subnets
 - [ ] DNS resolution works from within pods
 
 ### Expected Outcome
@@ -387,7 +388,8 @@ kubectl get pods -n lab-apps -l app=crashloop-pod -w
 
 ```powershell
 # List diagnostic settings on the AKS cluster
-az monitor diagnostic-settings list --resource $(terraform output -raw cluster_name) --resource-group rg-spoke-aks-networking-dev --resource-type Microsoft.ContainerService/managedClusters -o table
+$clusterId = az aks show -g rg-spoke-aks-networking-dev -n aks-akslab-dev --query id -o tsv
+az monitor diagnostic-settings list --resource $clusterId -o table
 ```
 
 Verify these log categories are enabled:
@@ -487,6 +489,8 @@ kubectl apply -f k8s/apps/secret-consumer.yaml
 kubectl logs -n lab-apps -l app=secret-consumer
 ```
 
+> Note: `k8s/apps/secret-consumer.yaml` includes placeholder values for Key Vault and identity fields. Fill those values before expecting successful secret retrieval.
+
 #### 5.5 Review Azure Policies
 
 ```powershell
@@ -497,12 +501,13 @@ az policy assignment list --scope $(az aks show -g rg-spoke-aks-networking-dev -
 Expected policies:
 - **Pod security baseline standards** (Audit mode)
 - **Deny pods without resource limits** (Audit mode)
+- **Enforce container images from ACR only** (Audit mode)
 
 ### Verification Checklist
 - [ ] Default-deny network policies applied to all namespaces
 - [ ] DNS egress allowed from all namespaces
 - [ ] Cross-namespace traffic blocked unless explicitly allowed
-- [ ] PSA labels applied (at minimum `baseline` enforce)
+- [ ] PSA labels applied (`lab-apps` restricted, `lab-monitoring` baseline)
 - [ ] Privileged pod creation is warned/denied
 - [ ] secret-consumer pod reads from Key Vault successfully
 - [ ] Azure Policy shows 2+ assignments on the AKS cluster

@@ -30,7 +30,7 @@
 |:--|:-----|:------------|
 | 🔭 | [Architecture Overview](architecture/overview.md) | Design philosophy and components |
 | 🌐 | [Network Topology](architecture/network-topology.md) | Hub-spoke design, IP plan, NSGs |
-| 🔐 | [Security Model](architecture/security-model.md) | Defense-in-depth, 6 security layers |
+| 🔐 | [Security Model](architecture/security-model.md) | Defense-in-depth controls and validation checks |
 
 </td>
 <td width="50%" valign="top">

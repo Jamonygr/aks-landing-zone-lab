@@ -6,213 +6,104 @@
 
 [![Hub-Spoke](https://img.shields.io/badge/Topology-Hub--Spoke-blue?style=for-the-badge)](.)
 [![CAF](https://img.shields.io/badge/Pattern-Cloud_Adoption_Framework-green?style=for-the-badge)](.)
-[![Landing Zones](https://img.shields.io/badge/Landing_Zones-6-orange?style=for-the-badge)](.)
+[![Landing Zones](https://img.shields.io/badge/Landing_Zones-7-orange?style=for-the-badge)](.)
 
 </div>
 
-# \ud83c\udfd7\ufe0f AKS Landing Zone Architecture
+# 🏗️ AKS Landing Zone Architecture
 
-> **Enterprise-grade AKS deployment** following Azure CAF and AKS Landing Zone Accelerator patterns with hub-spoke networking.
+This deployment follows Azure CAF landing-zone patterns with hub-spoke networking and Terraform-managed platform boundaries.
 
 ---
 
-## \ud83c\udf10 Overview
+## 🌐 Network And Cluster Baseline
 
-This project implements an enterprise-grade AKS deployment following the Azure [Cloud Adoption Framework (CAF)](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/) and [AKS Landing Zone Accelerator](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/scenarios/app-platform/aks/landing-zone-accelerator) patterns. The architecture uses a **hub-spoke network topology** with centralized management, security, governance, and identity landing zones.
+- Hub VNet: `10.0.0.0/16`
+- Spoke VNet: `10.1.0.0/16`
+- AKS pod CIDR: `192.168.0.0/16` (Azure CNI Overlay)
+- AKS service CIDR: `172.16.0.0/16`
+- DNS service IP: `172.16.0.10`
 
-## Network Topology
+Spoke subnets:
+- `snet-aks-system` (`10.1.0.0/24`)
+- `snet-aks-user` (`10.1.1.0/24`)
+- `snet-ingress` (`10.1.2.0/24`)
+- `snet-private-endpoints` (`10.1.3.0/24`)
 
-```
-                              ┌──────────────┐
-                              │   Internet   │
-                              └──────┬───────┘
-                                     │ HTTP/HTTPS
-                                     ▼
-  ┌─────────────────────────────────────────────────────────────────────┐
-  │  Spoke VNet — AKS (10.1.0.0/16)                                    │
-  │                                                                     │
-  │  ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐  │
-  │  │ snet-aks-system   │ │ snet-aks-user     │ │ snet-ingress      │  │
-  │  │ 10.1.0.0/24       │ │ 10.1.1.0/24       │ │ 10.1.2.0/24       │  │
-  │  │                   │ │                   │ │                   │  │
-  │  │  System Pool      │ │  User Pool        │ │  NGINX Ingress    │  │
-  │  │  B2s, 1-2 nodes   │ │  B2s, 1-3 nodes   │ │  Controller       │  │
-  │  └───────────────────┘ └───────────────────┘ └───────────────────┘  │
-  └────────────────────────────┬────────────────────────────────────────┘
-                               │ VNet Peering (bidirectional)
-                               ▼
-  ┌─────────────────────────────────────────────────────────────────────┐
-  │  Hub VNet (10.0.0.0/16)                                            │
-  │                                                                     │
-  │  ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐  │
-  │  │ snet-management   │ │ snet-shared-svc   │ │ AzureFirewallSnet │  │
-  │  │ 10.0.0.0/24       │ │ 10.0.1.0/24       │ │ 10.0.2.0/24       │  │
-  │  └───────────────────┘ └───────────────────┘ └───────────────────┘  │
-  └─────────────────────────────────────────────────────────────────────┘
+Hub subnets:
+- `snet-management` (`10.0.0.0/24`)
+- `snet-shared-services` (`10.0.1.0/24`)
+- `AzureFirewallSubnet` (`10.0.2.0/24`)
+- `AzureFirewallManagementSubnet` (`10.0.3.0/24`, when firewall enabled)
 
-  Azure Services:  Container Registry  ·  Key Vault  ·  Log Analytics
-```
+---
 
-## IP Addressing Plan
+## 🧩 Landing Zones
 
-### Hub VNet: 10.0.0.0/16
+1. `networking`: VNets, peering, NSGs, route table, optional firewall
+2. `aks-platform`: AKS, ACR, ingress, optional DNS zone
+3. `management`: Log Analytics, diagnostics, alerts, budget, optional Prometheus/Grafana
+4. `security`: Pod-security policy assignment, Key Vault, CSI Secrets Store, optional Defender
+5. `governance`: custom policy definitions and assignments for limits and ACR image source
+6. `identity`: workload identities, federated credentials, metrics storage access
+7. `data` (optional): SQL database with private endpoint + private DNS + Key Vault connection string
 
-| Subnet | CIDR | IP Range | Usable IPs | Purpose |
-|--------|------|----------|------------|---------|
-| snet-management | 10.0.0.0/24 | 10.0.0.4 – 10.0.0.254 | 251 | Jump boxes, bastion hosts |
-| snet-shared-services | 10.0.1.0/24 | 10.0.1.4 – 10.0.1.254 | 251 | Shared DNS, monitoring agents |
-| AzureFirewallSubnet | 10.0.2.0/24 | 10.0.2.4 – 10.0.2.254 | 251 | Azure Firewall (optional) |
-| *Reserved* | 10.0.3.0/24 – 10.0.255.0/24 | — | — | Future expansion |
+---
 
-### Spoke VNet: 10.1.0.0/16
+## 🔗 Dependency Graph
 
-| Subnet | CIDR | IP Range | Usable IPs | Purpose |
-|--------|------|----------|------------|---------|
-| snet-aks-system | 10.1.0.0/24 | 10.1.0.4 – 10.1.0.254 | 251 | AKS system node pool |
-| snet-aks-user | 10.1.1.0/24 | 10.1.1.4 – 10.1.1.254 | 251 | AKS user node pool (workloads) |
-| snet-ingress | 10.1.2.0/24 | 10.1.2.4 – 10.1.2.254 | 251 | Ingress controller / load balancer |
-| *Reserved* | 10.1.3.0/24 – 10.1.255.0/24 | — | — | Future expansion |
-
-### AKS Overlay Networking
-
-| Network | CIDR | Purpose |
-|---------|------|---------|
-| Pod CIDR | 192.168.0.0/16 | Pod IP addresses (Azure CNI Overlay) |
-| Service CIDR | 10.0.0.0/16 | Kubernetes ClusterIP services |
-| DNS Service IP | 10.0.0.10 | CoreDNS service endpoint |
-
-> **Note**: The AKS overlay network uses `192.168.0.0/16` for pod IPs, which are not routable outside the cluster. This avoids consuming VNet address space for pods while still allowing pods to reach VNet resources through the node's IP.
-
-## Component Architecture
-
-```
-  ┌──────────────────────────────────────────────────────────────────┐
-  │                        Root Module (main.tf)                     │
-  └──────────────────────────┬───────────────────────────────────────┘
-                             │
-       ┌─────────────────────┼─────────────────────────┐
-       ▼                     ▼                         ▼
-  ┌──────────┐      ┌──────────────┐           ┌─────────────┐
-  │Networking│─────▶│ AKS Platform │──────┬───▶│ Management  │
-  │          │      │              │      │    │             │
-  │Hub VNet  │      │AKS Cluster   │      │    │Log Analytics│
-  │Spoke VNet│      │ACR           │      │    │Insights     │
-  │Peering   │      │NGINX Ingress │      │    │Alerts       │
-  │NSGs      │      │DNS Zone (opt)│      │    │Prometheus   │
-  │Route Tbl │      └──────────────┘      │    └─────────────┘
-  │Firewall  │             │              │
-  └──────────┘       ┌─────┼──────┐       │
-                     ▼     ▼      ▼       │
-              ┌────────┐┌─────┐┌────────┐ │
-              │Security││ Gov ││Identity│ │
-              │        ││     ││        │ │
-              │Policy  ││Deny ││Workload│ │
-              │Key Vlt ││No   ││Identity│ │
-              │Defender││Lmts ││Fed Cred│ │
-              │CSI     ││ACR  ││Mgd ID  │ │
-              └────────┘└─────┘└────────┘ │
+```text
+networking -> aks-platform
+aks-platform -> management
+aks-platform -> security
+aks-platform -> governance
+aks-platform -> identity
+networking + management + security + identity -> data (optional)
 ```
 
-## Landing Zone Descriptions
+---
 
-### 1. Networking
-The foundational layer that establishes the hub-spoke network topology. The **hub VNet** centralizes shared services like DNS and optional Azure Firewall. The **spoke VNet** hosts the AKS cluster subnets. VNet peering enables bidirectional connectivity between hub and spoke.
+## 🚦 Traffic Patterns
 
-**Key resources**: Hub VNet, Spoke VNet, VNet Peering, NSGs (per subnet), Route Tables, Azure Firewall (optional).
+Ingress:
+- Internet -> Azure Load Balancer (ingress public IP) -> ingress-nginx -> cluster services
 
-### 2. AKS Platform
-The compute platform layer deploying the AKS cluster with system and user node pools. Uses Azure CNI Overlay for pod networking and Calico for network policy enforcement. Includes the NGINX ingress controller for HTTP(S) traffic routing and an Azure Container Registry for container images.
+Egress:
+- Default: spoke route table sends `0.0.0.0/0` directly to Internet
+- Optional: when firewall is enabled and `route_internet_via_firewall = true`, `0.0.0.0/0` uses hub firewall as next hop
 
-**Key resources**: AKS Cluster, System Node Pool, User Node Pool, ACR (Basic), NGINX Ingress Controller, Public IP, DNS Zone (optional).
+East-west:
+- Pod traffic on overlay network; Calico policies control allowed flows
 
-### 3. Management
-The observability layer providing logging, monitoring, alerting, and cost tracking. Log Analytics Workspace is the central log sink with Container Insights for AKS-specific telemetry. Metric alerts detect node and pod health issues.
+---
 
-**Key resources**: Log Analytics Workspace, Container Insights, Diagnostic Settings, Metric Alerts (11 rules), Action Group, Budget Alert, Managed Prometheus (optional), Managed Grafana (optional).
+## 📦 Resource Group Layout
 
-### 4. Security
-Enforces security baselines through Azure Policy, Key Vault for secret management, and the CSI Secrets Store Provider for pod-level secret injection. Optional Defender for Containers provides runtime threat detection.
+- `rg-hub-networking-{env}`
+- `rg-spoke-aks-networking-{env}`
+- `rg-management-{env}`
+- `rg-security-{env}`
+- `rg-governance-{env}`
+- `rg-identity-{env}`
+- `rg-data-{env}` (when SQL enabled)
+- `MC_*` node resource group (AKS-managed)
 
-**Key resources**: Azure Policy (Pod Security Baseline), Key Vault, CSI Secrets Store Provider, Defender for Containers (optional).
+---
 
-### 5. Governance
-Custom Azure Policy definitions and assignments for organizational compliance. Policies audit or deny pods that lack resource limits and restrict container images to the project ACR.
+## ✅ Key Decisions In Current Config
 
-**Key resources**: Custom Policy Definitions, Policy Assignments (cluster-scoped).
+- AKS version default: `1.32`
+- AKS upgrade channel: `patch`
+- Node OS SKU: `AzureLinux`
+- ACR SKU: `Basic`
+- Firewall: optional (off in `dev` and `lab`, on in `prod`)
+- DNS zone: enabled in `lab` and `prod`
+- SQL data zone: enabled in `lab` and `prod`
 
-### 6. Identity
-Workload Identity federation enabling pods to authenticate to Azure services using federated tokens rather than stored credentials. Managed identities are created for the workload and metrics-app service accounts.
+---
 
-**Key resources**: User-Assigned Managed Identities, Federated Identity Credentials, Storage Account (metrics demo).
+<div align="center">
 
-## Traffic Flows
+**[⬆ Back to Wiki Home](../README.md)**
 
-### Ingress (Internet → Application)
-
-```
-Internet
-  └── Azure Load Balancer (Public IP)
-        └── NGINX Ingress Controller (snet-ingress)
-              └── hello-web Service (ClusterIP)
-                    └── hello-web Pods (snet-aks-user)
-```
-
-1. User sends HTTP request to the public IP assigned to the Azure Load Balancer.
-2. Load Balancer forwards traffic to the NGINX Ingress Controller pods running in the ingress subnet.
-3. NGINX routes based on Ingress rules (hostname, path) to the target ClusterIP Service.
-4. Service distributes traffic across healthy pods via kube-proxy (iptables/IPVS).
-
-### Egress (Application → Internet)
-
-```
-Pod (overlay: 192.168.x.x)
-  └── Node NAT (SNAT to node IP in 10.1.x.x)
-        └── Azure Load Balancer (outbound rules)
-              └── Internet
-```
-
-By default, pods egress through the Azure Load Balancer's outbound rules. With Azure Firewall enabled, all egress routes through the hub firewall for centralized inspection and logging.
-
-### East-West (Pod → Pod)
-
-```
-Pod A (10.1.0.x / overlay 192.168.x.x)
-  └── Calico Network Policy Check
-        └── Pod B (same or different node)
-```
-
-Intra-cluster traffic uses the Azure CNI Overlay network. Calico evaluates network policies before allowing traffic. Default-deny policies require explicit allow rules for pod-to-pod communication.
-
-### Hub ↔ Spoke
-
-```
-Hub VNet (10.0.0.0/16)
-  ↔ VNet Peering (bidirectional)
-      ↔ Spoke VNet (10.1.0.0/16)
-```
-
-VNet peering enables direct, low-latency connectivity between hub and spoke without traversing the internet. Traffic stays on the Microsoft backbone network. Route tables can optionally force spoke traffic through the hub firewall.
-
-## Resource Group Layout
-
-| Resource Group | Contents | Purpose |
-|---|---|---|
-| `rg-hub-networking-{env}` | Hub VNet, subnets, NSGs, route table, firewall | Central network services |
-| `rg-spoke-aks-networking-{env}` | Spoke VNet, subnets, NSGs, route table | AKS network layer |
-| `rg-management-{env}` | Log Analytics, alerts, action groups, budget | Monitoring & cost |
-| `rg-security-{env}` | Key Vault, policy assignments, Defender | Security controls |
-| `rg-identity-{env}` | Managed identities, federated credentials | Identity & access |
-| `MC_*` (auto-created) | AKS-managed node pool resources | AKS infrastructure |
-
-## Design Decisions
-
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Network plugin | Azure CNI Overlay | Avoids exhausting VNet IPs for pods; pods get IPs from 192.168.0.0/16 |
-| Network policy | Calico | Industry standard; supports both ingress and egress policies |
-| Node VM size | Standard_B2s | Cost-effective for lab; burstable for occasional spikes |
-| API server access | Public | Simplified lab access; production would use private cluster |
-| ACR SKU | Basic | Sufficient for lab; no geo-replication needed |
-| Key Vault | RBAC-based | Recommended over access policies; integrates with managed identities |
-| Ingress | NGINX | Open-source standard; extensive community support |
-| Auto-upgrade | Patch channel | Automatic security patches; manual minor version upgrades |
+</div>
