@@ -106,12 +106,12 @@ try {
         exit 1
     }
 
-    $destroyArgs = @("destroy", "-var-file=`"$tfvarsFile`"", "-input=false")
+    $destroyArgs = @("destroy", "-var-file=$tfvarsFile", "-input=false")
     if ($AutoApprove) {
         $destroyArgs += "-auto-approve"
     }
 
-    terraform destroy -var-file="$tfvarsFile" -input=false -auto-approve:$AutoApprove.IsPresent
+    terraform @destroyArgs
     if ($LASTEXITCODE -ne 0) {
         Write-Err "terraform destroy failed."
         Write-Warn "Some resources may still exist. Check the Azure portal."
@@ -132,9 +132,12 @@ try {
         # Look for resource groups matching the naming convention
         $orphanedRGs = @()
         $expectedPatterns = @(
-            "rg-hub-${projectName}-${Environment}",
-            "rg-spoke-aks-${projectName}-${Environment}",
-            "rg-management-${projectName}-${Environment}"
+            "rg-hub-networking-${Environment}",
+            "rg-spoke-aks-networking-${Environment}",
+            "rg-management-${Environment}",
+            "rg-security-${Environment}",
+            "rg-identity-${Environment}",
+            "rg-data-${Environment}"
         )
 
         foreach ($pattern in $expectedPatterns) {

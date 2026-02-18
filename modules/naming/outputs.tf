@@ -111,3 +111,18 @@ output "budget" {
   description = "Budget name."
   value       = local.names.budget
 }
+
+output "sql_server" {
+  description = "SQL Server name."
+  value       = local.names.sql_server
+}
+
+output "sql_db" {
+  description = "SQL Database name."
+  value       = local.names.sql_db
+}
+
+output "rg_data" {
+  description = "Data resource group name."
+  value       = local.names.rg_data
+}

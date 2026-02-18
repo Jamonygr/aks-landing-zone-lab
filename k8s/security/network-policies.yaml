@@ -54,8 +54,50 @@ spec:
   ingress:
     - from:
         - namespaceSelector:
-            matchLabels:
-              purpose: ingress
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - ingress-nginx
+                  - lab-ingress
+---
+# Allow learning-hub pods egress to private endpoints subnet for SQL (1433)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-db-egress
+  namespace: lab-apps
+  labels:
+    environment: lab
+    purpose: security
+spec:
+  podSelector:
+    matchLabels:
+      app: learning-hub
+  policyTypes:
+    - Egress
+  egress:
+    # Azure SQL via private endpoint (port 1433)
+    - to:
+        - ipBlock:
+            cidr: 10.1.3.0/24
+      ports:
+        - protocol: TCP
+          port: 1433
+    # Azure IMDS for Workload Identity token acquisition
+    - to:
+        - ipBlock:
+            cidr: 168.63.129.16/32
+      ports:
+        - protocol: TCP
+          port: 80
+    # Azure AD for token exchange
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
 ---
 # --- lab-monitoring namespace ---
 apiVersion: networking.k8s.io/v1

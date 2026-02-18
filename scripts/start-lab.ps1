@@ -63,7 +63,7 @@ if (-not $ClusterName) {
     $ClusterName = "aks-${projectName}-${Environment}"
 }
 if (-not $ResourceGroup) {
-    $ResourceGroup = "rg-spoke-aks-${projectName}-${Environment}"
+    $ResourceGroup = "rg-spoke-aks-networking-${Environment}"
 }
 
 Write-Host ""

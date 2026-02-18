@@ -97,6 +97,18 @@ resource "azurerm_role_assignment" "aks_kv_secrets_user" {
   skip_service_principal_aad_check = true
 }
 
+resource "azurerm_role_assignment" "additional_kv_secrets_users" {
+  for_each = {
+    for idx, object_id in var.additional_key_vault_secrets_user_object_ids :
+    tostring(idx) => object_id
+  }
+
+  scope                            = azurerm_key_vault.main.id
+  role_definition_name             = "Key Vault Secrets User"
+  principal_id                     = each.value
+  skip_service_principal_aad_check = true
+}
+
 # Key Vault Administrator for current deployer
 resource "azurerm_role_assignment" "deployer_kv_admin" {
   scope                = azurerm_key_vault.main.id
@@ -130,6 +142,11 @@ resource "helm_release" "csi_secrets_store" {
   set {
     name  = "rotationPollInterval"
     value = "2m"
+  }
+
+  set {
+    name  = "tokenRequests[0].audience"
+    value = "api://AzureADTokenExchange"
   }
 }
 

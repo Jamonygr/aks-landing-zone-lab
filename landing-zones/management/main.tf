@@ -515,7 +515,7 @@ resource "azurerm_monitor_data_collection_rule" "prometheus" {
 
 resource "azurerm_dashboard_grafana" "main" {
   count                             = var.enable_managed_grafana ? 1 : 0
-  name                              = "grafana-aks-${var.environment}"
+  name                              = "grafana-aks-${var.environment}-${substr(md5(data.azurerm_subscription.current.id), 0, 6)}"
   resource_group_name               = azurerm_resource_group.management.name
   location                          = azurerm_resource_group.management.location
   grafana_major_version             = 11
@@ -524,8 +524,11 @@ resource "azurerm_dashboard_grafana" "main" {
   public_network_access_enabled     = true
   tags                              = var.tags
 
-  azure_monitor_workspace_integrations {
-    resource_id = var.enable_managed_prometheus ? azurerm_monitor_workspace.prometheus[0].id : ""
+  dynamic "azure_monitor_workspace_integrations" {
+    for_each = var.enable_managed_prometheus ? [azurerm_monitor_workspace.prometheus[0].id] : []
+    content {
+      resource_id = azure_monitor_workspace_integrations.value
+    }
   }
 
   identity {

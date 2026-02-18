@@ -1,0 +1,189 @@
+# learning-hub.yaml
+# Full-stack Next.js Learning Hub with Azure SQL backend.
+# Deployment, Service, Ingress, ConfigMap, SecretProviderClass, and ServiceAccount.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: learning-hub-sa
+  namespace: lab-apps
+  labels:
+    app: learning-hub
+    environment: lab
+  annotations:
+    azure.workload.identity/client-id: "__WORKLOAD_IDENTITY_CLIENT_ID__"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: learning-hub-config
+  namespace: lab-apps
+  labels:
+    app: learning-hub
+    environment: lab
+data:
+  NODE_ENV: "production"
+  SQL_SERVER_FQDN: "__SQL_SERVER_FQDN__"
+  SQL_DATABASE_NAME: "__SQL_DATABASE_NAME__"
+---
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: learning-hub-secrets
+  namespace: lab-apps
+  labels:
+    app: learning-hub
+    environment: lab
+spec:
+  provider: azure
+  parameters:
+    usePodIdentity: "false"
+    useVMManagedIdentity: "false"
+    clientID: "__WORKLOAD_IDENTITY_CLIENT_ID__"
+    keyvaultName: "__KEY_VAULT_NAME__"
+    cloudName: "AzurePublicCloud"
+    objects: |
+      array:
+        - |
+          objectName: sql-connection-string
+          objectType: secret
+          objectVersion: ""
+    tenantId: "__TENANT_ID__"
+  secretObjects:
+    - secretName: learning-hub-db-secrets
+      type: Opaque
+      data:
+        - objectName: sql-connection-string
+          key: sql-connection-string
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learning-hub
+  namespace: lab-apps
+  labels:
+    app: learning-hub
+    environment: lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: learning-hub
+  template:
+    metadata:
+      labels:
+        app: learning-hub
+        environment: lab
+        azure.workload.identity/use: "true"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/api/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: learning-hub-sa
+      containers:
+        - name: learning-hub
+          image: "__ACR_LOGIN_SERVER__/learning-hub:__LEARNING_HUB_IMAGE_TAG__"
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          envFrom:
+            - configMapRef:
+                name: learning-hub-config
+          env:
+            - name: SQL_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: learning-hub-db-secrets
+                  key: sql-connection-string
+                  optional: true
+          volumeMounts:
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: learning-hub-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: learning-hub
+  namespace: lab-apps
+  labels:
+    app: learning-hub
+    environment: lab
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3000"
+    prometheus.io/path: "/api/metrics"
+spec:
+  type: ClusterIP
+  selector:
+    app: learning-hub
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: learning-hub
+  namespace: lab-apps
+  labels:
+    app: learning-hub
+    environment: lab
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: learning-hub
+                port:
+                  number: 80

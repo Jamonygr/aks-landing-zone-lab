@@ -45,6 +45,11 @@ variable "enable_managed_grafana" {
   description = "Toggle to deploy Azure Managed Grafana instance"
   type        = bool
   default     = false
+
+  validation {
+    condition     = !var.enable_managed_grafana || var.enable_managed_prometheus
+    error_message = "enable_managed_grafana requires enable_managed_prometheus = true."
+  }
 }
 
 variable "alert_email" {

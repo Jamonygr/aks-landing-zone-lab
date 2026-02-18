@@ -74,14 +74,15 @@ metadata:
     app: hello-web
     environment: lab
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
     - http:
         paths:
-          - path: /
-            pathType: Prefix
+          - path: /hello(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: hello-web

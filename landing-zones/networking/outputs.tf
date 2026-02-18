@@ -36,3 +36,23 @@ output "hub_resource_group_name" {
   description = "Name of the hub networking resource group"
   value       = azurerm_resource_group.hub.name
 }
+
+output "private_endpoints_subnet_id" {
+  description = "Resource ID of the private endpoints subnet"
+  value       = azurerm_subnet.private_endpoints.id
+}
+
+output "hub_vnet_name" {
+  description = "Name of the hub virtual network"
+  value       = azurerm_virtual_network.hub.name
+}
+
+output "spoke_vnet_name" {
+  description = "Name of the spoke virtual network"
+  value       = azurerm_virtual_network.spoke_aks.name
+}
+
+output "spoke_resource_group_location" {
+  description = "Location of the spoke resource group"
+  value       = azurerm_resource_group.spoke.location
+}

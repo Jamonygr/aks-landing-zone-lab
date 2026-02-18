@@ -15,7 +15,7 @@
 
 .PARAMETER ResourceGroup
     Resource group containing the cluster. If omitted, derived from environment:
-    rg-spoke-aks-akslab-<env>.
+    rg-spoke-aks-networking-<env>.
 
 .PARAMETER Admin
     Get admin credentials instead of user credentials.
@@ -64,7 +64,7 @@ if (-not $ClusterName) {
     $ClusterName = "aks-${projectName}-${Environment}"
 }
 if (-not $ResourceGroup) {
-    $ResourceGroup = "rg-spoke-aks-${projectName}-${Environment}"
+    $ResourceGroup = "rg-spoke-aks-networking-${Environment}"
 }
 
 Write-Host ""

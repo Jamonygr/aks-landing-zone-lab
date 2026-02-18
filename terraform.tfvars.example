@@ -8,3 +8,6 @@ project_name = "akslab"
 owner        = "YourName"
 alert_email  = "admin@example.com"
 enable_cluster_alerts = true
+
+# ─── Database Toggles (optional) ─────────────────────────────────────────────
+# enable_sql_database = false  # +$5/mo (Basic 5 DTU)

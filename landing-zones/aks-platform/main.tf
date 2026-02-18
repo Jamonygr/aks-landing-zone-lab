@@ -20,10 +20,6 @@ terraform {
 # Data Sources
 #--------------------------------------------------------------
 
-data "azurerm_resource_group" "aks" {
-  name = var.resource_group_name
-}
-
 data "azurerm_client_config" "current" {}
 
 #--------------------------------------------------------------
@@ -33,7 +29,7 @@ data "azurerm_client_config" "current" {}
 resource "azurerm_kubernetes_cluster" "main" {
   name                = var.cluster_name
   location            = var.location
-  resource_group_name = data.azurerm_resource_group.aks.name
+  resource_group_name = var.resource_group_name
   dns_prefix          = var.dns_prefix
   kubernetes_version  = var.kubernetes_version
   tags                = var.tags
@@ -160,46 +156,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
 }
 
 #--------------------------------------------------------------
-# Diagnostic Settings for AKS
-#--------------------------------------------------------------
-
-resource "azurerm_monitor_diagnostic_setting" "aks" {
-  name                       = "diag-aks-${var.environment}"
-  target_resource_id         = azurerm_kubernetes_cluster.main.id
-  log_analytics_workspace_id = var.log_analytics_workspace_id
-
-  enabled_log {
-    category = "kube-apiserver"
-  }
-
-  enabled_log {
-    category = "kube-controller-manager"
-  }
-
-  enabled_log {
-    category = "kube-scheduler"
-  }
-
-  enabled_log {
-    category = "kube-audit-admin"
-  }
-
-  enabled_log {
-    category = "guard"
-  }
-
-  enabled_metric {
-    category = "AllMetrics"
-  }
-}
-
-#--------------------------------------------------------------
 # Azure Container Registry (Basic SKU)
 #--------------------------------------------------------------
 
 resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
-  resource_group_name = data.azurerm_resource_group.aks.name
+  resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = "Basic"
   admin_enabled       = false
@@ -306,7 +268,7 @@ resource "helm_release" "nginx_ingress" {
 resource "azurerm_dns_zone" "main" {
   count               = var.enable_dns_zone ? 1 : 0
   name                = var.dns_zone_name
-  resource_group_name = data.azurerm_resource_group.aks.name
+  resource_group_name = var.resource_group_name
   tags                = var.tags
 }
 
@@ -314,7 +276,7 @@ resource "azurerm_dns_a_record" "ingress" {
   count               = var.enable_dns_zone ? 1 : 0
   name                = "ingress"
   zone_name           = azurerm_dns_zone.main[0].name
-  resource_group_name = data.azurerm_resource_group.aks.name
+  resource_group_name = var.resource_group_name
   ttl                 = 300
   target_resource_id  = azurerm_public_ip.ingress.id
 }
@@ -323,7 +285,7 @@ resource "azurerm_dns_a_record" "wildcard" {
   count               = var.enable_dns_zone ? 1 : 0
   name                = "*"
   zone_name           = azurerm_dns_zone.main[0].name
-  resource_group_name = data.azurerm_resource_group.aks.name
+  resource_group_name = var.resource_group_name
   ttl                 = 300
   target_resource_id  = azurerm_public_ip.ingress.id
 }

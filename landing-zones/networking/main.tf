@@ -61,6 +61,14 @@ resource "azurerm_subnet" "firewall" {
   address_prefixes     = [cidrsubnet(var.hub_vnet_cidr, 8, 2)] # 10.0.2.0/24
 }
 
+resource "azurerm_subnet" "firewall_management" {
+  count                = var.enable_firewall ? 1 : 0
+  name                 = "AzureFirewallManagementSubnet"
+  resource_group_name  = azurerm_resource_group.hub.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = [cidrsubnet(var.hub_vnet_cidr, 8, 3)] # 10.0.3.0/24
+}
+
 #--------------------------------------------------------------
 # Spoke Virtual Network (AKS)
 #--------------------------------------------------------------
@@ -94,6 +102,13 @@ resource "azurerm_subnet" "ingress" {
   address_prefixes     = [cidrsubnet(var.spoke_aks_vnet_cidr, 8, 2)] # 10.1.2.0/24
 }
 
+resource "azurerm_subnet" "private_endpoints" {
+  name                 = "snet-private-endpoints"
+  resource_group_name  = azurerm_resource_group.spoke.name
+  virtual_network_name = azurerm_virtual_network.spoke_aks.name
+  address_prefixes     = [cidrsubnet(var.spoke_aks_vnet_cidr, 8, 3)] # 10.1.3.0/24
+}
+
 #--------------------------------------------------------------
 # Network Security Groups
 #--------------------------------------------------------------
@@ -105,14 +120,51 @@ resource "azurerm_network_security_group" "aks_system" {
   tags                = var.tags
 
   security_rule {
-    name                       = "AllowHTTPS"
+    name                       = "AllowHTTPFromInternet"
     priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "Internet"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "AllowHTTPS"
+    priority                   = 110
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "443"
     source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "AllowHTTPSFromInternet"
+    priority                   = 115
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "Internet"
+    destination_address_prefix = "*"
+  }
+
+  # Required for public LoadBalancer ingress (ingress-nginx NodePort listeners).
+  security_rule {
+    name                       = "AllowNodePortFromInternet"
+    priority                   = 130
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "30000-32767"
+    source_address_prefix      = "Internet"
     destination_address_prefix = "*"
   }
 
@@ -137,6 +189,18 @@ resource "azurerm_network_security_group" "aks_user" {
   }
 
   security_rule {
+    name                       = "AllowHTTPFromInternet"
+    priority                   = 105
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "Internet"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
     name                       = "AllowHTTPS"
     priority                   = 110
     direction                  = "Inbound"
@@ -145,6 +209,31 @@ resource "azurerm_network_security_group" "aks_user" {
     source_port_range          = "*"
     destination_port_range     = "443"
     source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "AllowHTTPSFromInternet"
+    priority                   = 115
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "Internet"
+    destination_address_prefix = "*"
+  }
+
+  # Required for public LoadBalancer ingress (ingress-nginx NodePort listeners).
+  security_rule {
+    name                       = "AllowNodePortFromInternet"
+    priority                   = 130
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "30000-32767"
+    source_address_prefix      = "Internet"
     destination_address_prefix = "*"
   }
 
@@ -181,6 +270,43 @@ resource "azurerm_network_security_group" "ingress" {
   }
 }
 
+resource "azurerm_network_security_group" "private_endpoints" {
+  name                = "nsg-private-endpoints-${var.environment}"
+  location            = azurerm_resource_group.spoke.location
+  resource_group_name = azurerm_resource_group.spoke.name
+  tags                = var.tags
+
+  security_rule {
+    name                   = "AllowSQLFromAKS"
+    priority               = 100
+    direction              = "Inbound"
+    access                 = "Allow"
+    protocol               = "Tcp"
+    source_port_range      = "*"
+    destination_port_range = "1433"
+    source_address_prefixes = [
+      cidrsubnet(var.spoke_aks_vnet_cidr, 8, 0),
+      cidrsubnet(var.spoke_aks_vnet_cidr, 8, 1)
+    ]
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                   = "AllowHTTPSFromAKS"
+    priority               = 110
+    direction              = "Inbound"
+    access                 = "Allow"
+    protocol               = "Tcp"
+    source_port_range      = "*"
+    destination_port_range = "443"
+    source_address_prefixes = [
+      cidrsubnet(var.spoke_aks_vnet_cidr, 8, 0),
+      cidrsubnet(var.spoke_aks_vnet_cidr, 8, 1)
+    ]
+    destination_address_prefix = "*"
+  }
+}
+
 #--------------------------------------------------------------
 # NSG Associations
 #--------------------------------------------------------------
@@ -198,6 +324,11 @@ resource "azurerm_subnet_network_security_group_association" "aks_user" {
 resource "azurerm_subnet_network_security_group_association" "ingress" {
   subnet_id                 = azurerm_subnet.ingress.id
   network_security_group_id = azurerm_network_security_group.ingress.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "private_endpoints" {
+  subnet_id                 = azurerm_subnet.private_endpoints.id
+  network_security_group_id = azurerm_network_security_group.private_endpoints.id
 }
 
 #--------------------------------------------------------------
@@ -223,8 +354,8 @@ resource "azurerm_route_table" "spoke_aks" {
   route {
     name                   = "to-internet"
     address_prefix         = "0.0.0.0/0"
-    next_hop_type          = var.enable_firewall ? "VirtualAppliance" : "Internet"
-    next_hop_in_ip_address = var.enable_firewall ? azurerm_firewall.hub[0].ip_configuration[0].private_ip_address : null
+    next_hop_type          = (var.enable_firewall && var.route_internet_via_firewall) ? "VirtualAppliance" : "Internet"
+    next_hop_in_ip_address = (var.enable_firewall && var.route_internet_via_firewall) ? azurerm_firewall.hub[0].ip_configuration[0].private_ip_address : null
   }
 }
 
@@ -276,6 +407,16 @@ resource "azurerm_public_ip" "firewall" {
   tags                = var.tags
 }
 
+resource "azurerm_public_ip" "firewall_management" {
+  count               = var.enable_firewall ? 1 : 0
+  name                = "pip-fw-mgmt-hub-${var.environment}"
+  location            = azurerm_resource_group.hub.location
+  resource_group_name = azurerm_resource_group.hub.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  tags                = var.tags
+}
+
 resource "azurerm_firewall_policy" "hub" {
   count               = var.enable_firewall ? 1 : 0
   name                = "fwpol-hub-${var.environment}"
@@ -299,6 +440,12 @@ resource "azurerm_firewall" "hub" {
     name                 = "fw-ip-config"
     subnet_id            = azurerm_subnet.firewall.id
     public_ip_address_id = azurerm_public_ip.firewall[0].id
+  }
+
+  management_ip_configuration {
+    name                 = "fw-mgmt-ip-config"
+    subnet_id            = azurerm_subnet.firewall_management[0].id
+    public_ip_address_id = azurerm_public_ip.firewall_management[0].id
   }
 }
 
@@ -327,6 +474,15 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rules" {
       source_addresses      = [var.spoke_aks_vnet_cidr]
       destination_addresses = ["*"]
       destination_ports     = ["123"]
+    }
+
+    # Required for AKS node bootstrap/package pulls when traffic is forced through Firewall.
+    rule {
+      name                  = "allow-aks-outbound-any"
+      protocols             = ["Any"]
+      source_addresses      = [var.spoke_aks_vnet_cidr]
+      destination_addresses = ["*"]
+      destination_ports     = ["*"]
     }
   }
 }

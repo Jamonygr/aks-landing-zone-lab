@@ -32,9 +32,10 @@ enable_managed_grafana    = true  # +$10/mo
 enable_defender           = false # +$7/node/mo
 enable_dns_zone           = true  # +$0.50/mo
 dns_zone_name             = "akslab-lab.example.com"
-enable_cluster_alerts     = true  # alerts after AKS comes online
-enable_keda               = true  # free
-enable_azure_files        = true  # +$1/mo
-enable_app_insights       = false # +$0-5/mo
-
+enable_cluster_alerts     = true      # alerts after AKS comes online
+enable_keda               = true      # free
+enable_azure_files        = true      # +$1/mo
+enable_app_insights       = false     # +$0-5/mo
+enable_sql_database       = true      # +$5/mo (Basic 5 DTU)
+data_location             = "eastus2" # eastus has capacity restrictions
 

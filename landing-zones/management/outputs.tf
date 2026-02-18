@@ -14,7 +14,7 @@ output "log_analytics_workspace_name" {
 
 output "grafana_endpoint" {
   description = "Endpoint URL for the Managed Grafana instance (empty if not deployed)"
-  value       = var.enable_managed_grafana ? azurerm_dashboard_grafana.main[0].endpoint : ""
+  value       = try(azurerm_dashboard_grafana.main[0].endpoint, "")
 }
 
 output "action_group_id" {
@@ -24,5 +24,5 @@ output "action_group_id" {
 
 output "prometheus_workspace_id" {
   description = "Resource ID of the Managed Prometheus workspace (empty if not deployed)"
-  value       = var.enable_managed_prometheus ? azurerm_monitor_workspace.prometheus[0].id : ""
+  value       = try(azurerm_monitor_workspace.prometheus[0].id, "")
 }

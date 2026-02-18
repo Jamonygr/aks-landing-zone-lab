@@ -33,6 +33,12 @@ variable "cluster_identity_id" {
   type        = string
 }
 
+variable "additional_key_vault_secrets_user_object_ids" {
+  description = "Additional principal object IDs to grant Key Vault Secrets User access."
+  type        = list(string)
+  default     = []
+}
+
 variable "enable_defender" {
   description = "Toggle to enable Microsoft Defender for Containers"
   type        = bool

@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --page-ink: #0f172a;
+  --page-bg: #f8fafc;
+  --brand-sky: #0369a1;
+  --brand-teal: #0f766e;
+  --brand-amber: #b45309;
+  --panel: rgba(255, 255, 255, 0.86);
+  --panel-border: rgba(148, 163, 184, 0.35);
+}
+
+body {
+  color: var(--page-ink);
+  background: var(--page-bg);
+  font-family: var(--font-display), 'Space Grotesk', 'Segoe UI', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.mesh-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(40% 30% at 12% 15%, rgba(14, 165, 233, 0.18), transparent 60%),
+    radial-gradient(35% 30% at 88% 8%, rgba(20, 184, 166, 0.16), transparent 62%),
+    radial-gradient(40% 35% at 78% 85%, rgba(251, 191, 36, 0.16), transparent 65%),
+    linear-gradient(160deg, #f8fafc 0%, #f1f5f9 45%, #f8fafc 100%);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(10px);
+}
+
+.section-title {
+  font-size: clamp(1.4rem, 1.5vw, 1.85rem);
+  letter-spacing: -0.015em;
+}
+
+.mono-label {
+  font-family: var(--font-mono), 'IBM Plex Mono', 'Consolas', monospace;
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.7s ease both;
+}
+
+.fade-in-up-delayed {
+  animation: fadeInUp 0.9s ease both;
+}
+
+.float-slow {
+  animation: floatSlow 9s ease-in-out infinite;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}

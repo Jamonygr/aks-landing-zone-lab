@@ -30,5 +30,9 @@ locals {
     dns_zone    = "pdz-${local.prefix}-${local.loc}"
     ingress     = "ingress-${local.prefix}-${local.loc}"
     budget      = "budget-${local.prefix}"
+    sql_server  = "sql-${local.prefix}-${local.loc}"
+    sql_db      = "sqldb-${local.prefix}-${local.loc}"
+    pe_sql      = "pe-sql-${local.prefix}-${local.loc}"
+    rg_data     = "rg-${local.prefix}-data-${local.loc}"
   }
 }

@@ -8,12 +8,13 @@
 module "networking" {
   source = "./landing-zones/networking"
 
-  environment         = var.environment
-  location            = var.location
-  tags                = local.tags
-  hub_vnet_cidr       = var.hub_vnet_cidr
-  spoke_aks_vnet_cidr = var.spoke_aks_vnet_cidr
-  enable_firewall     = var.enable_firewall
+  environment                 = var.environment
+  location                    = var.location
+  tags                        = local.tags
+  hub_vnet_cidr               = var.hub_vnet_cidr
+  spoke_aks_vnet_cidr         = var.spoke_aks_vnet_cidr
+  enable_firewall             = var.enable_firewall
+  route_internet_via_firewall = var.route_internet_via_firewall
 }
 
 module "aks_platform" {
@@ -38,8 +39,6 @@ module "aks_platform" {
   user_node_max_count        = var.user_node_pool_max
   enable_dns_zone            = var.enable_dns_zone
   dns_zone_name              = var.dns_zone_name
-
-  depends_on = [module.networking]
 }
 
 module "management" {
@@ -64,9 +63,10 @@ module "security" {
   tags                = local.tags
   cluster_id          = module.aks_platform.cluster_id
   cluster_identity_id = module.aks_platform.kubelet_identity_object_id
-  enable_defender     = var.enable_defender
-
-  depends_on = [module.aks_platform]
+  additional_key_vault_secrets_user_object_ids = [
+    module.identity.workload_identity_principal_id
+  ]
+  enable_defender = var.enable_defender
 }
 
 module "governance" {
@@ -77,18 +77,34 @@ module "governance" {
   tags        = local.tags
   cluster_id  = module.aks_platform.cluster_id
   acr_id      = module.aks_platform.acr_id
-
-  depends_on = [module.aks_platform]
 }
 
 module "identity" {
   source = "./landing-zones/identity"
 
-  environment     = var.environment
-  location        = var.location
-  tags            = local.tags
-  cluster_name    = module.aks_platform.cluster_name
-  oidc_issuer_url = module.aks_platform.oidc_issuer_url
+  environment                   = var.environment
+  location                      = var.location
+  tags                          = local.tags
+  cluster_name                  = module.aks_platform.cluster_name
+  oidc_issuer_url               = module.aks_platform.oidc_issuer_url
+  workload_namespace            = "lab-apps"
+  workload_service_account_name = "learning-hub-sa"
+}
 
-  depends_on = [module.aks_platform]
+module "data" {
+  count  = var.enable_sql_database ? 1 : 0
+  source = "./landing-zones/data"
+
+  environment                    = var.environment
+  location                       = var.location
+  data_location                  = var.data_location
+  tags                           = local.tags
+  enable_sql_database            = var.enable_sql_database
+  private_endpoints_subnet_id    = module.networking.private_endpoints_subnet_id
+  hub_vnet_id                    = module.networking.hub_vnet_id
+  spoke_vnet_id                  = module.networking.spoke_vnet_id
+  log_analytics_workspace_id     = module.management.log_analytics_workspace_id
+  enable_diagnostics             = true
+  key_vault_id                   = module.security.key_vault_id
+  workload_identity_principal_id = module.identity.workload_identity_principal_id
 }

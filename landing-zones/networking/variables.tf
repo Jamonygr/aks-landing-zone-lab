@@ -56,6 +56,12 @@ variable "enable_firewall" {
   default     = false
 }
 
+variable "route_internet_via_firewall" {
+  description = "If true and firewall is enabled, route AKS subnet 0.0.0.0/0 through firewall."
+  type        = bool
+  default     = false
+}
+
 variable "log_analytics_workspace_id" {
   description = "Log Analytics Workspace ID for diagnostic settings (empty string to skip)"
   type        = string

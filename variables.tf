@@ -55,6 +55,12 @@ variable "enable_firewall" {
   default     = false
 }
 
+variable "route_internet_via_firewall" {
+  description = "Route AKS internet egress via Azure Firewall when enabled. Set false for public LoadBalancer ingress symmetry."
+  type        = bool
+  default     = false
+}
+
 variable "enable_managed_prometheus" {
   description = "Enable Azure Managed Prometheus - adds ~$0-5/mo"
   type        = bool
@@ -65,6 +71,11 @@ variable "enable_managed_grafana" {
   description = "Enable Azure Managed Grafana - adds ~$10/mo"
   type        = bool
   default     = false
+
+  validation {
+    condition     = !var.enable_managed_grafana || var.enable_managed_prometheus
+    error_message = "enable_managed_grafana requires enable_managed_prometheus = true."
+  }
 }
 
 variable "enable_defender" {
@@ -99,6 +110,18 @@ variable "enable_azure_files" {
 
 variable "enable_app_insights" {
   description = "Enable Application Insights synthetic test - adds ~$0-5/mo"
+  type        = bool
+  default     = false
+}
+
+variable "data_location" {
+  description = "Azure region for database resources (SQL). Leave empty to use the main location. Use a different region if the primary has capacity restrictions."
+  type        = string
+  default     = ""
+}
+
+variable "enable_sql_database" {
+  description = "Enable Azure SQL Database (Basic 5 DTU) - adds ~$5/mo"
   type        = bool
   default     = false
 }

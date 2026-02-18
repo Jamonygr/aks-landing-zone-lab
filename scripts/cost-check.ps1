@@ -116,9 +116,12 @@ Write-Info "Querying Azure Cost Management..."
 
 $projectName = "akslab"
 $rgPatterns = @(
-    "rg-hub-${projectName}-${Environment}",
-    "rg-spoke-aks-${projectName}-${Environment}",
-    "rg-management-${projectName}-${Environment}",
+    "rg-hub-networking-${Environment}",
+    "rg-spoke-aks-networking-${Environment}",
+    "rg-management-${Environment}",
+    "rg-security-${Environment}",
+    "rg-identity-${Environment}",
+    "rg-data-${Environment}",
     "rg-terraform-state"
 )
 
