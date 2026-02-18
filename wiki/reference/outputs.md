@@ -4,159 +4,101 @@
 
 <div align="center">
 
-[![Outputs](https://img.shields.io/badge/Outputs-9-blue?style=for-the-badge)](.) 
-[![Categories](https://img.shields.io/badge/Categories-4-green?style=for-the-badge)](.) 
-[![Format](https://img.shields.io/badge/Format-JSON%20%7C%20Text-orange?style=for-the-badge)](.) 
+[![Outputs](https://img.shields.io/badge/Outputs-17-blue?style=for-the-badge)](.)
+[![Categories](https://img.shields.io/badge/Categories-5-green?style=for-the-badge)](.)
+[![Source](https://img.shields.io/badge/Source-outputs.tf-orange?style=for-the-badge)](.)
 
 </div>
 
 # 📤 Outputs Reference
 
-All Terraform outputs exported by the AKS Landing Zone Lab root module, defined in `outputs.tf`.
+All root outputs from `outputs.tf`.
 
 ---
 
 ## ☸️ Cluster
 
-| Output | Type | Description | Example Value |
-|--------|------|-------------|---------------|
-| `cluster_name` | `string` | The name of the AKS cluster | `aks-akslab-dev` |
-| `cluster_fqdn` | `string` | The fully qualified domain name of the AKS API server | `aks-akslab-dev-abc123.hcp.eastus.azmk8s.io` |
-| `kubeconfig_command` | `string` | Command to fetch kubeconfig for kubectl | `az aks get-credentials --resource-group rg-spoke-aks-networking-dev --name aks-akslab-dev` |
-
-### Usage
-
-```powershell
-# Get the cluster name
-terraform output cluster_name
-
-# Copy & run the kubeconfig command
-terraform output -raw kubeconfig_command | Invoke-Expression
-
-# Or use the get-credentials script
-.\scripts\get-credentials.ps1
-```
+| Output | Description |
+|--------|-------------|
+| `cluster_name` | AKS cluster name |
+| `cluster_fqdn` | AKS API server FQDN |
+| `kubeconfig_command` | Ready-to-run `az aks get-credentials` command |
+| `spoke_resource_group_name` | Spoke resource group containing AKS resources |
 
 ---
 
 ## 🌐 Networking
 
-| Output | Type | Description | Example Value |
-|--------|------|-------------|---------------|
-| `hub_vnet_id` | `string` | Azure resource ID of the hub VNet | `/subscriptions/.../resourceGroups/rg-hub-networking-dev/providers/Microsoft.Network/virtualNetworks/vnet-hub-dev` |
-| `spoke_vnet_id` | `string` | Azure resource ID of the spoke VNet | `/subscriptions/.../resourceGroups/rg-spoke-aks-networking-dev/providers/Microsoft.Network/virtualNetworks/vnet-spoke-aks-dev` |
-| `ingress_public_ip` | `string` | The public IP address assigned to the NGINX ingress controller's Load Balancer | `20.85.123.45` |
-
-### Usage
-
-```powershell
-# Get the ingress public IP to access applications
-$ip = terraform output -raw ingress_public_ip
-curl "http://$ip" -H "Host: hello-web.local"
-
-# Use the VNet IDs for cross-referencing
-terraform output hub_vnet_id
-terraform output spoke_vnet_id
-```
+| Output | Description |
+|--------|-------------|
+| `hub_vnet_id` | Hub VNet resource ID |
+| `spoke_vnet_id` | Spoke VNet resource ID |
+| `ingress_public_ip` | Public IP assigned to ingress controller |
 
 ---
 
-## 📦 Container Registry
+## 📦 Registry And Identity
 
-| Output | Type | Description | Example Value |
-|--------|------|-------------|---------------|
-| `acr_login_server` | `string` | The login server URL for the Azure Container Registry | `acrakslabdev.azurecr.io` |
-
-### Usage
-
-```powershell
-# Get the ACR login server
-$acr = terraform output -raw acr_login_server
-
-# Login to ACR
-az acr login --name ($acr -split '\.')[0]
-
-# Tag and push an image
-docker tag myapp:latest "${acr}/myapp:v1"
-docker push "${acr}/myapp:v1"
-
-# Verify AKS can pull from ACR
-az aks check-acr -g rg-spoke-aks-networking-dev -n aks-akslab-dev --acr $acr
-```
+| Output | Description |
+|--------|-------------|
+| `acr_login_server` | ACR login server URL |
+| `workload_identity_client_id` | Client ID for workload managed identity |
+| `workload_identity_principal_id` | Principal ID for workload managed identity |
 
 ---
 
-## 📊 Monitoring
+## 📊 Monitoring And Security
 
-| Output | Type | Description | Example Value |
-|--------|------|-------------|---------------|
-| `log_analytics_workspace_id` | `string` | Azure resource ID of the Log Analytics workspace | `/subscriptions/.../resourceGroups/rg-management-dev/providers/Microsoft.OperationalInsights/workspaces/law-aks-dev` |
-| `grafana_endpoint` | `string` | The URL of the Azure Managed Grafana instance (empty if disabled) | `https://akslab-dev-abc123.eus.grafana.azure.com` |
-
-### Usage
-
-```powershell
-# Get the Log Analytics workspace ID for KQL queries
-terraform output log_analytics_workspace_id
-
-# Open Grafana (if enabled)
-$grafana = terraform output -raw grafana_endpoint
-if ($grafana) { Start-Process $grafana }
-```
+| Output | Description |
+|--------|-------------|
+| `log_analytics_workspace_id` | Log Analytics workspace ID |
+| `grafana_endpoint` | Managed Grafana endpoint (empty when disabled) |
+| `key_vault_name` | Key Vault name |
+| `key_vault_uri` | Key Vault URI |
+| `tenant_id` | Tenant ID of current Azure context |
 
 ---
 
-## 📍 Output Sources
+## 🗄 Data
 
-Each output is sourced from a specific landing zone module:
-
-| Output | Source Module | Source Output |
-|--------|-------------|--------------|
-| `cluster_name` | `module.aks_platform` | `cluster_name` |
-| `cluster_fqdn` | `module.aks_platform` | `cluster_fqdn` |
-| `kubeconfig_command` | Computed | Uses `module.networking` + `module.aks_platform` |
-| `hub_vnet_id` | `module.networking` | `hub_vnet_id` |
-| `spoke_vnet_id` | `module.networking` | `spoke_vnet_id` |
-| `ingress_public_ip` | `module.aks_platform` | `ingress_public_ip` |
-| `acr_login_server` | `module.aks_platform` | `acr_login_server` |
-| `log_analytics_workspace_id` | `module.management` | `log_analytics_workspace_id` |
-| `grafana_endpoint` | `module.management` | `grafana_endpoint` |
+| Output | Description |
+|--------|-------------|
+| `sql_server_fqdn` | SQL server FQDN (empty when SQL disabled) |
+| `sql_database_name` | SQL database name (empty when SQL disabled) |
 
 ---
 
-## 💻 Accessing Outputs
+## 💻 Usage
 
 ```powershell
 # List all outputs
 terraform output
 
-# Get a specific output as plain text (no quotes)
+# Pull specific values
 terraform output -raw cluster_name
+terraform output -raw ingress_public_ip
+terraform output -raw acr_login_server
 
-# Get all outputs as JSON
+# Run kubeconfig command from output
+terraform output -raw kubeconfig_command | Invoke-Expression
+
+# JSON for scripting
 terraform output -json
-
-# Use in PowerShell variables
-$clusterName = terraform output -raw cluster_name
-$ingressIp = terraform output -raw ingress_public_ip
-$acrServer = terraform output -raw acr_login_server
 ```
 
 ---
 
-## 🔗 Downstream Usage
+## 🔗 Source Mapping
 
-These outputs are commonly used in subsequent operations:
-
-| Operation | Outputs Used |
-|-----------|-------------|
-| Get kubectl credentials | `kubeconfig_command` |
-| Access the application | `ingress_public_ip` |
-| Push container images | `acr_login_server` |
-| Run KQL queries | `log_analytics_workspace_id` |
-| View Grafana dashboards | `grafana_endpoint` |
-| Verify VNet peering | `hub_vnet_id`, `spoke_vnet_id` |
-| Script automation | All outputs via `terraform output -json` |
+| Output | Source |
+|--------|--------|
+| `cluster_name`, `cluster_fqdn`, `ingress_public_ip`, `acr_login_server` | `module.aks_platform` |
+| `spoke_resource_group_name`, `hub_vnet_id`, `spoke_vnet_id` | `module.networking` |
+| `workload_identity_client_id`, `workload_identity_principal_id` | `module.identity` |
+| `log_analytics_workspace_id`, `grafana_endpoint` | `module.management` |
+| `key_vault_name`, `key_vault_uri` | `module.security` |
+| `tenant_id` | `data.azurerm_client_config.current` |
+| `sql_server_fqdn`, `sql_database_name` | `module.data[0]` when enabled |
 
 ---
 
