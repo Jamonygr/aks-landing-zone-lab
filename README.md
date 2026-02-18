@@ -35,7 +35,7 @@ A **production-ready** Azure Kubernetes Service deployment following Microsoft's
 
 ### Landing Zones
 
-The infrastructure is organized into **six independently deployable landing zones**, each owning a specific platform concern:
+The infrastructure is organized into **seven landing zones** (the data zone is optional), each owning a specific platform concern:
 
 <table>
 <tr>
@@ -75,6 +75,14 @@ The infrastructure is organized into **six independently deployable landing zone
 
 **🪪 Identity**
 > Workload Identity Federation, managed identities, federated credentials
+
+</td>
+</tr>
+<tr>
+<td>
+
+**🗄 Data (Optional)**
+> Azure SQL Database, private endpoint + private DNS, Key Vault connection string secret
 
 </td>
 </tr>
@@ -180,9 +188,10 @@ Three pre-built environment profiles with different feature toggles:
 <tr><td><b>Prometheus</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
 <tr><td><b>Grafana</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
 <tr><td><b>Defender</b></td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
-<tr><td><b>Flux GitOps</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
-<tr><td><b>DNS Zone</b></td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
-<tr><td><b>KEDA</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
+<tr><td><b>DNS Zone</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
+<tr><td><b>SQL Database</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
+<tr><td><b>Route Internet via Firewall</b></td><td align="center">N/A</td><td align="center">N/A</td><td align="center">❌ (default)</td></tr>
+<tr><td><b>KEDA / Azure Files / App Insights</b></td><td align="center">Reserved vars</td><td align="center">Reserved vars</td><td align="center">Reserved vars</td></tr>
 <tr><td><b>Est. Cost</b></td><td align="center">~$5/day</td><td align="center">~$8/day</td><td align="center">~$25/day</td></tr>
 </table>
 
@@ -193,6 +202,7 @@ Three pre-built environment profiles with different feature toggles:
 | Script | Description |
 |:-------|:------------|
 | `scripts/bootstrap.ps1` | Install prerequisites, authenticate, create state backend |
+| `scripts/build-app.ps1` | Build and push the Learning Hub app image to ACR |
 | `scripts/deploy.ps1` | Full Terraform init → plan → apply pipeline |
 | `scripts/destroy.ps1` | Safe teardown with confirmation prompts |
 | `scripts/get-credentials.ps1` | Fetch AKS kubeconfig and verify cluster access |
@@ -247,7 +257,7 @@ aks-landing-zone-lab/
 ├── variables.tf               # Input variables with descriptions
 ├── locals.tf                  # Computed values and naming conventions
 ├── outputs.tf                 # Cluster endpoints, IPs, resource IDs
-├── providers.tf               # AzureRM ~>4.0, Helm, Kubernetes providers
+├── providers.tf               # AzureRM ~>4.0, Helm ~>2.12, Random ~>3.5
 ├── backend.tf                 # Remote state configuration
 ├── terraform.tfvars.example   # Template for custom variables
 │
@@ -256,20 +266,22 @@ aks-landing-zone-lab/
 │   ├── lab.tfvars
 │   └── prod.tfvars
 │
-├── landing-zones/             # Six platform landing zones
+├── landing-zones/             # Seven platform landing zones (data optional)
 │   ├── networking/            #   Hub-spoke VNets, NSGs, peering
 │   ├── aks-platform/          #   AKS cluster, ACR, ingress
 │   ├── management/            #   Monitoring, alerts, Prometheus
 │   ├── security/              #   Key Vault, policies, Defender
 │   ├── governance/            #   Custom Azure Policy definitions
-│   └── identity/              #   Workload Identity, managed IDs
+│   ├── identity/              #   Workload Identity, managed IDs
+│   └── data/                  #   Optional SQL database and private endpoint
 │
 ├── modules/                   # Reusable Terraform modules
 │   ├── aks/                   ├── networking/
 │   ├── acr/                   ├── monitoring/
 │   ├── keyvault/              ├── firewall/
 │   ├── ingress/               ├── policy/
-│   ├── rbac/                  ├── storage/
+│   ├── rbac/                  ├── private-endpoint/
+│   ├── storage/               ├── sql-database/
 │   ├── naming/                ├── cost-management/
 │   └── resource-group/        └── firewall-rules/
 │

@@ -4,214 +4,201 @@
 
 <div align="center">
 
-[![Zones](https://img.shields.io/badge/Landing_Zones-6-blue?style=for-the-badge)](.)
+[![Zones](https://img.shields.io/badge/Landing_Zones-7-blue?style=for-the-badge)](.)
+[![Optional](https://img.shields.io/badge/Data_Zone-Optional-orange?style=for-the-badge)](.)
 [![CAF](https://img.shields.io/badge/Pattern-Cloud_Adoption_Framework-green?style=for-the-badge)](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/)
-[![Terraform](https://img.shields.io/badge/IaC-Terraform-purple?style=for-the-badge&logo=terraform)](.)
 
 </div>
 
-# \ud83c\udfd7\ufe0f Landing Zones
+# 🏗️ Landing Zones
 
-## \ud83c\udf10 Overview
+The root module orchestrates **7 landing zones**.  
+`landing-zones/data` is optional and deploys only when `enable_sql_database = true`.
 
-The AKS Landing Zone Lab organizes infrastructure into **six landing zones**, each responsible for a specific domain. This mirrors the [Azure Cloud Adoption Framework landing zone model](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/) where platform capabilities are separated into independently deployable units.
+---
 
-```
-                     ┌────────────────────────┐
-                     │  Root Module (main.tf) │
-                     └────────────┬───────────┘
-                                │
-         ┌──────────────────┼───────────────────┐
-         ▼                    ▼                   ▼
-  ┌──────────────────┐ ...               ...
-  │ 1. Networking      │
-  │                    │  All six landing zones are
-  │ Hub VNet + Subnets │  invoked from the root module.
-  │ Spoke VNet + Snet  │
-  │ VNet Peering       │  Dependency chain:
-  │ NSGs + Route Tbl   │
-  │ Firewall (opt)     │  Networking ─▶ AKS Platform ─┬─▶ Management
-  └─────────┬────────┘                          ├─▶ Security
-            │                                    ├─▶ Governance
-            ▼                                    └─▶ Identity
-  ┌──────────────────┐
-  │ 2. AKS Platform    │  ┌──────────────────┐  ┌──────────────────┐
-  │                    │  │ 3. Management      │  │ 4. Security        │
-  │ AKS Cluster        │  │                    │  │                    │
-  │ System + User Pool │  │ Log Analytics      │  │ Azure Policy       │
-  │ Container Registry │  │ Container Insights │  │ Key Vault + CSI    │
-  │ NGINX Ingress      │  │ Alert Rules        │  │ Defender (opt)     │
-  │ DNS Zone (opt)     │  │ Budget Alerts      │  └──────────────────┘
-  └──────────────────┘  │ Prometheus (opt)   │
-                          └──────────────────┘  ┌──────────────────┐
-                                                 │ 5. Governance      │
-  ┌──────────────────┐                          │                    │
-  │ 6. Identity        │                          │ Deny No Limits     │
-  │                    │                          │ Enforce ACR Source │
-  │ Workload Identity  │                          └──────────────────┘
-  │ Federated Creds    │
-  │ Managed Identities │
-  └──────────────────┘
+## 🌐 Dependency Flow
+
+```text
+1. networking
+   -> 2. aks-platform
+      -> 3. management
+      -> 4. security
+      -> 5. governance
+      -> 6. identity
+3 + 4 + 6 (+ networking outputs)
+   -> 7. data (optional)
 ```
 
 ---
 
 ## 📚 Landing Zone Details
 
-### 🌐 1. Networking (`landing-zones/networking/`)
+### 1) Networking (`landing-zones/networking`)
 
-**Purpose**: Establishes the foundational network topology for all other landing zones.
+Purpose: foundational hub-spoke network, subnet segmentation, NSGs, route table, optional firewall.
 
-**Resources created**:
-| Resource | Name Pattern | Description |
-|----------|-------------|-------------|
-| Resource Group (Hub) | `rg-hub-networking-{env}` | Contains all hub network resources |
-| Resource Group (Spoke) | `rg-spoke-aks-networking-{env}` | Contains all spoke network resources |
-| Hub VNet | `vnet-hub-{env}` | 10.0.0.0/16 — centralized services |
-| Hub Subnets | `snet-management`, `snet-shared-services`, `AzureFirewallSubnet` | 3 subnets in /24 blocks |
-| Spoke VNet | `vnet-spoke-aks-{env}` | 10.1.0.0/16 — AKS workloads |
-| Spoke Subnets | `snet-aks-system`, `snet-aks-user`, `snet-ingress` | 3 subnets in /24 blocks |
-| VNet Peering | hub↔spoke | Bidirectional peering |
-| NSGs | `nsg-aks-system-{env}`, `nsg-aks-user-{env}`, `nsg-ingress-{env}` | Per-subnet security rules |
-| Route Table | `rt-spoke-{env}` | Routes to hub firewall (when enabled) |
-| Azure Firewall | `fw-{env}` | Optional, Basic SKU, +$900/mo |
-| Diagnostic Settings | `diag-*` | Logs → Log Analytics |
+Key resources:
+- `rg-hub-networking-{env}` and `rg-spoke-aks-networking-{env}`
+- Hub VNet (`10.0.0.0/16`) and spoke VNet (`10.1.0.0/16`)
+- Subnets: `snet-management`, `snet-shared-services`, `AzureFirewallSubnet`, `AzureFirewallManagementSubnet` (optional), `snet-aks-system`, `snet-aks-user`, `snet-ingress`, `snet-private-endpoints`
+- NSGs for system, user, ingress, and private endpoints
+- Route table `rt-spoke-aks-{env}` with:
+  - `to-hub` route when firewall is enabled
+  - `to-internet` route using Internet by default or firewall when `route_internet_via_firewall = true`
+- Hub<->spoke VNet peering
+- Optional Azure Firewall Basic + firewall policy/rules
 
-**Key outputs**: VNet IDs, subnet IDs, resource group names.
+Key outputs:
+- VNet IDs, AKS subnet IDs, private endpoint subnet ID, spoke RG name
 
-**Dependencies**: None (this is the first landing zone deployed).
+Dependencies:
+- none
 
 ---
 
-### ☁️ 2. AKS Platform (`landing-zones/aks-platform/`)
+### 2) AKS Platform (`landing-zones/aks-platform`)
 
-**Purpose**: Deploys the Kubernetes compute platform with supporting services.
+Purpose: Kubernetes platform + image registry + ingress + optional DNS zone.
 
-**Resources created**:
-| Resource | Name Pattern | Description |
-|----------|-------------|-------------|
-| AKS Cluster | `aks-akslab-{env}` | Kubernetes 1.29, Azure CNI Overlay, Calico, OIDC enabled |
-| System Node Pool | `system` | Standard_B2s, 1-2 nodes, autoscale |
-| User Node Pool | `user` | Standard_B2s, 1-3 nodes, autoscale, labels+taints |
-| Container Registry | `acr{project}{env}` | Basic SKU, admin disabled |
-| ACR Role Assignment | — | AcrPull role for kubelet identity |
-| Public IP (Ingress) | `pip-ingress-{env}` | Static Standard SKU |
-| NGINX Ingress | Helm release | ingress-nginx chart |
-| DNS Zone | `dns-{env}` | Optional (+$0.50/mo) |
+Key resources:
+- AKS cluster (`kubernetes_version` variable, default `1.32`)
+- System and user node pools (autoscaling, AzureLinux OS)
+- Azure CNI Overlay + Calico (`pod_cidr=192.168.0.0/16`, `service_cidr=172.16.0.0/16`)
+- OIDC issuer and workload identity enabled
+- Azure RBAC enabled for AKS
+- ACR (Basic SKU) + `AcrPull` assignment for kubelet identity
+- NGINX ingress Helm release + static public IP
+- Optional Azure DNS zone with `ingress` and wildcard A records
 
-**Key outputs**: Cluster name, FQDN, ACR login server, ingress public IP, OIDC issuer URL, kubelet identity.
+Key outputs:
+- Cluster ID/name/FQDN, kube admin creds (sensitive), kubelet object ID, OIDC issuer URL, ACR ID/login server, ingress public IP
 
-**Dependencies**: Networking (subnet IDs).
-
----
-
-### 📊 3. Management (`landing-zones/management/`)
-
-**Purpose**: Centralized observability, alerting, and cost management.
-
-**Resources created**:
-| Resource | Name Pattern | Description |
-|----------|-------------|-------------|
-| Resource Group | `rg-management-{env}` | Management resources |
-| Log Analytics Workspace | `law-aks-{env}` | 30-day retention, configurable daily cap |
-| Container Insights Solution | `ContainerInsights` | AKS pod/node metrics and logs |
-| Diagnostic Settings (AKS) | `diag-aks-management-{env}` | 6 log categories + AllMetrics |
-| Activity Log Diagnostic | `diag-activity-log-{env}` | Subscription-level activity |
-| Action Group | `ag-aks-{env}` | Email notifications |
-| Metric Alerts (9) | `alert-*` | Node/pod health monitoring |
-| Budget Alert | `budget-akslab-{env}` | Cost threshold (configurable) |
-| Managed Prometheus | Optional | Azure Monitor Workspace |
-| Managed Grafana | Optional | Pre-built Kubernetes dashboards |
-
-**Key outputs**: Log Analytics workspace ID, Grafana endpoint.
-
-**Dependencies**: AKS Platform (cluster ID).
+Dependencies:
+- networking subnet IDs
+- management Log Analytics workspace ID
 
 ---
 
-### 🔒 4. Security (`landing-zones/security/`)
+### 3) Management (`landing-zones/management`)
 
-**Purpose**: Security controls for secrets, policies, and threat detection.
+Purpose: centralized observability, alerting, and budget controls.
 
-**Resources created**:
-| Resource | Name Pattern | Description |
-|----------|-------------|-------------|
-| Resource Group | `rg-security-{env}` | Security resources |
-| Azure Policy Assignment | `pol-pod-security-baseline-{env}` | Pod Security Baseline (Audit) |
-| Key Vault | `kv-aks-{env}-{hash}` | RBAC-enabled, soft delete 7d |
-| KV Role Assignment | — | Key Vault Secrets User for kubelet |
-| CSI Secrets Store | Helm release | Secrets provider class for AKS |
-| Defender for Containers | Optional | Runtime threat detection (+$7/node/mo) |
+Key resources:
+- `rg-management-{env}`
+- Log Analytics workspace + Container Insights solution
+- AKS diagnostic settings (when `enable_cluster_alerts = true`)
+- Subscription activity log diagnostics
+- Action group for email notifications
+- Metric alerts (node readiness, CPU, memory) when cluster alerts are enabled
+- Scheduled query alerts (pod restarts, failed pods, OOMKilled, API 5xx, image pull failures) when cluster alerts are enabled
+- Log ingestion cap alert
+- Resource-group budget with threshold notifications
+- Optional Azure Managed Prometheus workspace + DCE + DCR
+- Optional Azure Managed Grafana (requires Prometheus)
 
-**Key outputs**: Key Vault ID, Key Vault URI.
+Key outputs:
+- Log Analytics workspace ID/name, action group ID, optional Grafana endpoint, optional Prometheus workspace ID
 
-**Dependencies**: AKS Platform (cluster ID, kubelet identity).
-
----
-
-### 📜 5. Governance (`landing-zones/governance/`)
-
-**Purpose**: Custom Azure Policy definitions and assignments for organizational compliance.
-
-**Resources created**:
-| Resource | Description |
-|----------|-------------|
-| Custom Policy: Deny Pods Without Resource Limits | Ensures all pods have CPU/memory limits |
-| Custom Policy: Enforce ACR Image Source | Restricts container images to project ACR |
-| Policy Assignment (No Limits) | Assigned to AKS cluster (Audit mode) |
-| Policy Assignment (ACR Source) | Assigned to AKS cluster (Audit mode) |
-
-**Key outputs**: Policy assignment IDs.
-
-**Dependencies**: AKS Platform (cluster ID, ACR ID).
+Dependencies:
+- AKS cluster ID
 
 ---
 
-### 🔑 6. Identity (`landing-zones/identity/`)
+### 4) Security (`landing-zones/security`)
 
-**Purpose**: Workload Identity federation enabling pods to access Azure services without stored credentials.
+Purpose: security baseline, secrets management, and optional runtime protection.
 
-**Resources created**:
-| Resource | Name Pattern | Description |
-|----------|-------------|-------------|
-| Resource Group | `rg-identity-{env}` | Identity resources |
-| Managed Identity (Workload) | `id-workload-{cluster}-{env}` | General workload identity |
-| Federated Credential (Workload) | `fic-workload-{cluster}` | Maps K8s SA → Azure identity |
-| Managed Identity (Metrics App) | `id-metrics-app-{cluster}-{env}` | Metrics app identity |
-| Federated Credential (Metrics) | `fic-metrics-app-{cluster}` | Maps metrics SA → Azure identity |
-| Storage Account | `stmetrics{env}{hash}` | Demo storage for metrics app |
-| Storage Container | `metrics-data` | Blob container for metrics data |
-| Role Assignment | Storage Blob Data Contributor | Metrics identity → storage |
+Key resources:
+- `rg-security-{env}`
+- Pod Security Baseline Azure Policy assignment (audit effect)
+- Key Vault (RBAC-enabled)
+- Key Vault role assignments:
+  - AKS kubelet identity
+  - additional identities passed from root (currently workload identity principal)
+  - deployer as Key Vault Administrator
+- CSI Secrets Store driver + Azure provider Helm releases
+- Sample Key Vault secret (`sample-secret`)
+- Optional Defender for Containers pricing tier
 
-**Key outputs**: Workload identity client IDs, storage account name.
+Key outputs:
+- Key Vault ID/name/URI, policy assignment ID
 
-**Dependencies**: AKS Platform (OIDC issuer URL, cluster name).
+Dependencies:
+- AKS cluster ID and kubelet identity object ID
+
+---
+
+### 5) Governance (`landing-zones/governance`)
+
+Purpose: custom Kubernetes policy definitions and assignments at cluster scope.
+
+Key resources:
+- `rg-governance-{env}`
+- Custom policy definition: deny pods without resource limits
+- Custom policy definition: allow images only from project ACR regex
+- Resource policy assignments (currently configured with `Audit` effect)
+
+Key outputs:
+- Policy definition and assignment IDs
+
+Dependencies:
+- AKS cluster ID and ACR ID
+
+---
+
+### 6) Identity (`landing-zones/identity`)
+
+Purpose: workload identity federation and demo storage access.
+
+Key resources:
+- `rg-identity-{env}`
+- Workload user-assigned identity + federated credential
+- Metrics app user-assigned identity + federated credential
+- Storage account + private blob container (`metrics-data`)
+- RBAC assignments for metrics identity:
+  - `Storage Blob Data Contributor`
+  - `Storage Queue Data Contributor`
+
+Key outputs:
+- Workload and metrics identity client/principal IDs, metrics storage account/container names
+
+Dependencies:
+- AKS cluster name and OIDC issuer URL
+
+---
+
+### 7) Data (Optional) (`landing-zones/data`)
+
+Purpose: private Azure SQL database for application scenarios.
+
+Key resources (only when `enable_sql_database = true`):
+- `rg-data-{env}`
+- SQL server + `learninghub` database (via `modules/sql-database`)
+- Private endpoint in `snet-private-endpoints`
+- Private DNS zone link (`privatelink.database.windows.net`)
+- SQL diagnostics to Log Analytics
+- Key Vault secret `sql-connection-string`
+
+Key outputs:
+- SQL server FQDN and database name (empty string when disabled), data resource group name
+
+Dependencies:
+- networking private endpoint subnet and VNet IDs
+- management Log Analytics workspace ID
+- security Key Vault ID
+- identity workload principal ID
 
 ---
 
 ## 🚀 Deployment Order
 
-Landing zones are deployed sequentially through `depends_on` chains in the root module:
+Terraform resolves this graph automatically:
 
-```
-1. Networking          ─┐
-2. AKS Platform  ◄─────┘
-3. Management    ◄──── AKS Platform
-4. Security      ◄──── AKS Platform
-5. Governance    ◄──── AKS Platform
-6. Identity      ◄──── AKS Platform
-```
-
-Steps 3–6 run in parallel after step 2 completes (Terraform resolves the dependency graph).
-
-## ➕ Adding a New Landing Zone
-
-To add a new landing zone:
-
-1. Create a directory under `landing-zones/` with `main.tf`, `variables.tf`, `outputs.tf`
-2. Add a module block in the root `main.tf`
-3. Wire up inputs from existing landing zone outputs
-4. Add `depends_on` to ensure correct ordering
+1. `networking`
+2. `aks-platform`
+3. `management`, `security`, `governance`, and `identity` in parallel
+4. `data` (optional, after required upstream outputs are available)
 
 ---
 

@@ -38,7 +38,7 @@
 ### 🏗 Infrastructure
 | | Page | Description |
 |:--|:-----|:------------|
-| 🧩 | [Landing Zones](landing-zones/README.md) | 6 landing zone modules |
+| 🧩 | [Landing Zones](landing-zones/README.md) | 7 landing zones (data optional) |
 | 📦 | [Module Index](modules/README.md) | All reusable Terraform modules |
 
 ### 📖 Reference
@@ -72,26 +72,27 @@ aks-landing-zone-lab/
 ├── outputs.tf                     Cluster info, endpoints, kubeconfig
 ├── locals.tf                      Naming, tags, computed values
 ├── backend.tf                     Azure Storage remote state
-├── providers.tf                   azurerm, azuread, helm, kubernetes
+├── providers.tf                   azurerm, helm, random
 │
 ├── environments/                  Per-environment variable files
 │   ├── dev.tfvars                   Budget-safe defaults (~$5/day)
 │   ├── lab.tfvars                   Extended features (~$8/day)
 │   └── prod.tfvars                  Production reference profile
 │
-├── landing-zones/                 6 landing zone modules
+├── landing-zones/                 7 landing zones (data optional)
 │   ├── networking/                  Hub-spoke VNets, peering, NSGs
 │   ├── aks-platform/                AKS cluster, ACR, ingress
 │   ├── management/                  Log Analytics, alerts, budgets
 │   ├── security/                    Key Vault, policies, Defender
 │   ├── governance/                  Custom Azure Policies
-│   └── identity/                    Workload Identity, managed IDs
+│   ├── identity/                    Workload Identity, managed IDs
+│   └── data/                        Optional SQL + private endpoint
 │
-├── modules/                       14 reusable Terraform modules
+├── modules/                       16 reusable Terraform modules
 │
 ├── k8s/                           Kubernetes manifests
 │   ├── namespaces/                  Namespace defs, quotas, RBAC
-│   ├── apps/                        13 sample workloads
+│   ├── apps/                        15 sample workloads
 │   ├── security/                    Network policies, PSA
 │   ├── autoscaling/                 HPA, KEDA, load tests
 │   ├── storage/                     StorageClasses
@@ -125,10 +126,10 @@ aks-landing-zone-lab/
 <tr><td><b>Prometheus</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
 <tr><td><b>Grafana</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
 <tr><td><b>Defender</b></td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
-<tr><td><b>KEDA</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
 <tr><td><b>DNS Zone</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
-<tr><td><b>Azure Files</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
+<tr><td><b>SQL Database</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
 <tr><td><b>Firewall</b></td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
+<tr><td><b>KEDA / Azure Files / App Insights</b></td><td align="center">Reserved vars</td><td align="center">Reserved vars</td><td align="center">Reserved vars</td></tr>
 </table>
 
 ---
