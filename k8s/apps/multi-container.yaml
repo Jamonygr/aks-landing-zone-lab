@@ -15,6 +15,13 @@ metadata:
   annotations:
     description: "Demonstrates init, main, and sidecar container patterns"
 spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
   initContainers:
     - name: init-config
       image: busybox:1.36
@@ -36,6 +43,10 @@ spec:
       volumeMounts:
         - name: html-volume
           mountPath: /usr/share/nginx/html
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
       resources:
         requests:
           cpu: 50m
@@ -45,14 +56,18 @@ spec:
           memory: 128Mi
   containers:
     - name: nginx
-      image: nginx:alpine
+      image: nginxinc/nginx-unprivileged:stable-alpine
       ports:
-        - containerPort: 80
+        - containerPort: 8080
       volumeMounts:
         - name: html-volume
           mountPath: /usr/share/nginx/html
         - name: log-volume
           mountPath: /var/log/nginx
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
       resources:
         requests:
           cpu: 50m
@@ -63,7 +78,7 @@ spec:
       livenessProbe:
         httpGet:
           path: /
-          port: 80
+          port: 8080
         initialDelaySeconds: 5
         periodSeconds: 10
     - name: log-tailer
@@ -79,6 +94,10 @@ spec:
         - name: log-volume
           mountPath: /var/log/nginx
           readOnly: true
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
       resources:
         requests:
           cpu: 50m

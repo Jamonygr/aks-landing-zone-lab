@@ -13,6 +13,9 @@
 .PARAMETER Tag
     Image tag. Default: latest.
 
+.PARAMETER Environment
+    Terraform environment used when auto-detecting ACR output (dev, lab, prod, staging).
+
 .PARAMETER LocalBuild
     Use local Docker daemon instead of ACR cloud build.
 
@@ -24,6 +27,9 @@
 
 .EXAMPLE
     .\scripts\build-app.ps1 -LocalBuild
+
+.EXAMPLE
+    .\scripts\build-app.ps1 -Environment prod -Tag "v1.0.0"
 #>
 
 [CmdletBinding()]
@@ -33,6 +39,10 @@ param(
 
     [Parameter()]
     [string]$Tag = "latest",
+
+    [Parameter()]
+    [ValidateSet("dev", "lab", "prod", "staging")]
+    [string]$Environment = "lab",
 
     [Parameter()]
     [switch]$LocalBuild
@@ -50,17 +60,22 @@ $rootDir   = Split-Path -Parent $scriptDir
 $appDir    = Join-Path $rootDir "app"
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║       AKS Learning Hub - Build & Push Container Image       ║" -ForegroundColor Cyan
-Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host "+------------------------------------------------------------+" -ForegroundColor Cyan
+Write-Host "|      AKS Learning Hub - Build & Push Container Image      |" -ForegroundColor Cyan
+Write-Host "+------------------------------------------------------------+" -ForegroundColor Cyan
 Write-Host ""
 
-# ── Resolve ACR name ────────────────────────────────────────────────────────
+# -- Resolve ACR name -------------------------------------------------------
 
 if (-not $AcrName) {
     Write-Info "Detecting ACR name from Terraform output..."
     try {
+        $stateKey = "aks-landing-zone-lab-$Environment.tfstate"
         Push-Location $rootDir
+        terraform init -input=false -reconfigure -backend-config="key=$stateKey" 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "terraform init failed for state key '$stateKey'"
+        }
         $AcrName = (terraform output -raw acr_login_server 2>$null) -replace '\.azurecr\.io$', ''
         Pop-Location
         if (-not $AcrName) { throw "empty" }
@@ -82,7 +97,7 @@ if (-not (Test-Path $appDir)) {
     exit 1
 }
 
-# ── Build ────────────────────────────────────────────────────────────────────
+# -- Build -------------------------------------------------------------------
 
 if ($LocalBuild) {
     Write-Info "Building locally with Docker..."
@@ -124,7 +139,7 @@ Write-Host ""
 Write-Success "Image built and pushed: $fullTag"
 Write-Host ""
 Write-Info "Next steps:"
-Write-Host "  1. .\scripts\deploy-workloads.ps1 -Environment lab -ImageTag `"$Tag`"" -ForegroundColor Gray
+Write-Host "  1. .\scripts\deploy-workloads.ps1 -Environment $Environment -ImageTag $Tag" -ForegroundColor Gray
 Write-Host "  2. kubectl rollout status deployment/learning-hub -n lab-apps" -ForegroundColor Gray
 Write-Host "  3. kubectl get ingress -n lab-apps" -ForegroundColor Gray
 Write-Host ""

@@ -14,12 +14,23 @@ metadata:
   annotations:
     description: "Intentionally failing pod for alert testing"
 spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
   containers:
     - name: crashloop
       image: busybox:1.36
       command: ["/bin/sh", "-c"]
       args:
         - "echo 'This pod is designed to crash for testing purposes'; exit 1"
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
       resources:
         requests:
           cpu: 50m

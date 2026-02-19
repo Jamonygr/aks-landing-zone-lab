@@ -4,20 +4,23 @@
 
 <div align="center">
 
-[![Modules](https://img.shields.io/badge/Modules-16-purple?style=for-the-badge)](.)
-[![Nested](https://img.shields.io/badge/Nested_Submodules-11-blue?style=for-the-badge)](.)
-[![Provider](https://img.shields.io/badge/azurerm-~>4.0-green?style=for-the-badge&logo=terraform)](.)
+[![Top Level Modules](https://img.shields.io/badge/Top_Level_Modules-16-ff4ea8?style=for-the-badge)](.)
+[![Nested Modules](https://img.shields.io/badge/Nested_Submodules-11-39f4ff?style=for-the-badge)](.)
+[![Primary Provider](https://img.shields.io/badge/azurerm-~%3E4.0-a56fff?style=for-the-badge&logo=terraform)](.)
 
 </div>
 
-# 🧩 Module Index
+# Module Index
 
-The repository currently contains **16 reusable Terraform modules**.  
-In the active root deployment, `landing-zones/data` consumes `modules/sql-database`, which in turn uses `modules/private-endpoint` and `modules/networking/private-dns-zone`.
+This repository contains **16 top-level Terraform modules** under `modules/`.
+Nested reusable components are currently grouped under:
 
----
+- `modules/networking/*` (6)
+- `modules/monitoring/*` (5)
 
-## 📂 Module Directory
+Total nested submodules: **11**.
+
+## Top-Level Module Directories
 
 ```text
 modules/
@@ -29,19 +32,8 @@ modules/
 ├── ingress/
 ├── keyvault/
 ├── monitoring/
-│   ├── action-group/
-│   ├── alerts/
-│   ├── diagnostic-settings/
-│   ├── log-analytics/
-│   └── nsg-flow-logs/
 ├── naming/
 ├── networking/
-│   ├── nsg/
-│   ├── peering/
-│   ├── private-dns-zone/
-│   ├── route-table/
-│   ├── subnet/
-│   └── vnet/
 ├── policy/
 ├── private-endpoint/
 ├── rbac/
@@ -50,43 +42,50 @@ modules/
 └── storage/
 ```
 
----
+## Active Root Usage
 
-## 📚 Module Reference
+Directly from `main.tf` and landing-zone module wiring:
 
-| Module | Purpose | Current Root Usage |
-|--------|---------|--------------------|
-| `acr` | Azure Container Registry + role assignment patterns | Reusable (not directly wired) |
-| `aks` | AKS cluster and node pool patterns | Reusable (not directly wired) |
-| `cost-management` | Subscription budget and notifications | Reusable (not directly wired) |
-| `firewall` | Azure Firewall resources | Reusable (not directly wired) |
-| `firewall-rules` | Firewall rule collections | Reusable (not directly wired) |
-| `ingress` | NGINX ingress Helm deployment | Reusable (not directly wired) |
-| `keyvault` | Key Vault with RBAC assignments | Reusable (not directly wired) |
-| `monitoring/*` | Log Analytics, alerts, diagnostics, NSG flow logs | Reusable (not directly wired) |
-| `naming` | Naming map generation | Reusable (not directly wired) |
-| `networking/*` | VNet, subnet, NSG, peering, route table, private DNS | `private-dns-zone` used by `sql-database` |
-| `policy` | Azure Policy assignment helper | Reusable (not directly wired) |
-| `private-endpoint` | Generic private endpoint resource | Used by `sql-database` |
-| `rbac` | Azure role assignment helper | Reusable (not directly wired) |
-| `resource-group` | Resource group helper | Reusable (not directly wired) |
-| `sql-database` | Azure SQL (Basic), private endpoint, diagnostics | Used by `landing-zones/data` |
-| `storage` | Storage account helper | Reusable (not directly wired) |
+- The root deployment orchestrates landing zones in `landing-zones/*`.
+- Inside landing zones, only `landing-zones/data/main.tf` currently consumes a library module directly:
+  - `../../modules/sql-database`
+- `modules/sql-database` then composes:
+  - `modules/private-endpoint`
+  - `modules/networking/private-dns-zone`
 
----
+Most other modules are reusable building blocks available for future decomposition or alternate root compositions.
 
-## 🎯 Design Principles
+## Module Purpose Map
 
-1. Single-responsibility modules
-2. Typed inputs with practical defaults
-3. Consistent tags from root inputs
-4. Useful IDs and endpoints exported as outputs
-5. Provider configuration inherited from the root module
+| Module | Purpose |
+|:--|:--|
+| `acr` | ACR patterns and registry configuration |
+| `aks` | AKS cluster and node-pool module patterns |
+| `cost-management` | Budget and cost notification patterns |
+| `firewall` | Azure Firewall resources |
+| `firewall-rules` | Firewall policy/rule collections |
+| `ingress` | NGINX ingress Helm deployment module |
+| `keyvault` | Key Vault and RBAC assignment patterns |
+| `monitoring/*` | Alerts, diagnostics, Log Analytics, flow-log integrations |
+| `naming` | Naming and convention helpers |
+| `networking/*` | VNet, subnet, NSG, route-table, peering, private DNS |
+| `policy` | Azure Policy definition/assignment helper |
+| `private-endpoint` | Generic private endpoint helper |
+| `rbac` | Azure role assignment helper |
+| `resource-group` | Resource-group creation helper |
+| `sql-database` | Azure SQL + private endpoint + diagnostics composition |
+| `storage` | Storage account helpers |
 
----
+## Design Principles
 
-<div align="center">
+1. Keep modules single-purpose and composable.
+2. Enforce typed inputs with safe defaults.
+3. Keep tags and naming consistent from root locals.
+4. Export meaningful outputs (IDs, endpoints, names).
+5. Let provider config be inherited from root.
 
-**[&larr; Landing Zones](../landing-zones/README.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Wiki Home](../README.md)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Reference &rarr;](../reference/naming-conventions.md)**
+## Related Docs
 
-</div>
+- `../landing-zones/README.md`
+- `../README.md`
+- `../reference/variables.md`

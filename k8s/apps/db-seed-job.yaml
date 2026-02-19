@@ -9,7 +9,7 @@ metadata:
   namespace: lab-apps
   labels:
     app: db-seed
-    environment: lab
+    environment: __ENVIRONMENT__
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         app: db-seed
-        environment: lab
+        environment: __ENVIRONMENT__
         azure.workload.identity/use: "true"
     spec:
       serviceAccountName: learning-hub-sa

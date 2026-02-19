@@ -1,0 +1,25 @@
+<svg width="720" height="720" viewBox="0 0 720 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="sunGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(360 300) rotate(90) scale(340)">
+      <stop stop-color="#FFD27A" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#FF6BBB" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#A156FF" stop-opacity="0.18"/>
+    </radialGradient>
+    <clipPath id="sunClip">
+      <circle cx="360" cy="300" r="220"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="360" cy="300" r="220" fill="url(#sunGlow)"/>
+  <g clip-path="url(#sunClip)" stroke="#280B45" stroke-width="14" opacity="0.52">
+    <line x1="120" y1="140" x2="600" y2="140"/>
+    <line x1="120" y1="176" x2="600" y2="176"/>
+    <line x1="120" y1="212" x2="600" y2="212"/>
+    <line x1="120" y1="248" x2="600" y2="248"/>
+    <line x1="120" y1="284" x2="600" y2="284"/>
+    <line x1="120" y1="320" x2="600" y2="320"/>
+    <line x1="120" y1="356" x2="600" y2="356"/>
+    <line x1="120" y1="392" x2="600" y2="392"/>
+    <line x1="120" y1="428" x2="600" y2="428"/>
+  </g>
+</svg>

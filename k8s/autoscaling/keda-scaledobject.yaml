@@ -47,6 +47,13 @@ spec:
         app: keda-worker
         environment: lab
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: worker
           image: busybox:1.36
@@ -55,6 +62,10 @@ spec:
             - |
               echo "KEDA worker started - waiting for messages...";
               while true; do sleep 10; done
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           resources:
             requests:
               cpu: 50m

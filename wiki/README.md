@@ -1,150 +1,96 @@
 <div align="center">
 
-# 📘 AKS Landing Zone Lab — Wiki
+<img src="images/wiki-reference.svg" alt="Wiki Overview" width="900"/>
 
-**Enterprise-grade AKS infrastructure on Azure using Terraform landing zones**
+# AKS Landing Zone Lab Wiki
 
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.32-326CE5?style=flat-square&logo=kubernetes&logoColor=white)](#)
-[![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.5-844fba?style=flat-square&logo=terraform&logoColor=white)](#)
-[![AzureRM](https://img.shields.io/badge/AzureRM-~%3E4.0-0078D4?style=flat-square&logo=microsoftazure&logoColor=white)](#)
+Reference and execution docs for Terraform landing zones and the fused module runbook app.
 
----
+[Landing Zones](landing-zones/README.md) | [Modules](modules/README.md) | [Guides](guides/lab-guide.md) | [Reference](reference/variables.md)
 
 </div>
 
-## 🗺 Navigation
+## Current Baseline
 
-<table>
-<tr>
-<td width="50%" valign="top">
+| Item | Current value |
+|:--|:--|
+| Terraform | `>= 1.5.0` |
+| Providers | `azurerm ~> 4.0`, `helm ~> 2.12`, `random ~> 3.5` |
+| Kubernetes | `1.32` |
+| Landing zones | 7 (`data` optional) |
+| Modules | 16 top-level + 11 nested |
+| Fused runbook | 1000 pages / 50 modules / 20 pages per module |
 
-### 🏁 Getting Started
-| | Guide | Description |
-|:--|:------|:------------|
-| 📘 | [Lab Guide](guides/lab-guide.md) | 8-day structured curriculum |
-| 💰 | [Cost Optimization](guides/cost-optimization.md) | Budget management and teardown |
-| 🔧 | [Troubleshooting](guides/troubleshooting.md) | Common errors and fixes |
+## Navigation
 
-### 🏛 Architecture
-| | Page | Description |
-|:--|:-----|:------------|
-| 🔭 | [Architecture Overview](architecture/overview.md) | Design philosophy and components |
-| 🌐 | [Network Topology](architecture/network-topology.md) | Hub-spoke design, IP plan, NSGs |
-| 🔐 | [Security Model](architecture/security-model.md) | Defense-in-depth controls and validation checks |
+### Getting Started
 
-</td>
-<td width="50%" valign="top">
+- `guides/lab-guide.md`
+- `guides/cost-optimization.md`
+- `guides/troubleshooting.md`
 
-### 🏗 Infrastructure
-| | Page | Description |
-|:--|:-----|:------------|
-| 🧩 | [Landing Zones](landing-zones/README.md) | 7 landing zones (data optional) |
-| 📦 | [Module Index](modules/README.md) | All reusable Terraform modules |
+### Architecture
 
-### 📖 Reference
-| | Page | Description |
-|:--|:-----|:------------|
-| 🏷 | [Naming Conventions](reference/naming-conventions.md) | Resource naming standards |
-| ⚙ | [Variables Reference](reference/variables.md) | All Terraform input variables |
-| 📤 | [Outputs Reference](reference/outputs.md) | All Terraform outputs |
+- `architecture/overview.md`
+- `architecture/network-topology.md`
+- `architecture/security-model.md`
 
-### 📚 Guides
-| | Guide | Description |
-|:--|:------|:------------|
-| 📊 | [Monitoring Guide](guides/monitoring-guide.md) | Log Analytics, KQL, Insights |
-| 🔒 | [Security Guide](guides/security-guide.md) | Network policies, PSA, Key Vault |
-| 💥 | [Chaos Guide](guides/chaos-guide.md) | Chaos Mesh experiments |
-| 🔄 | [GitOps Guide](guides/gitops-guide.md) | Flux v2 setup and workflow |
+### Infrastructure Reference
 
-</td>
-</tr>
-</table>
+- `landing-zones/README.md`
+- `modules/README.md`
+- `reference/naming-conventions.md`
+- `reference/variables.md`
+- `reference/outputs.md`
 
----
+### Operations Guides
 
-## 📂 Project Structure
+- `guides/monitoring-guide.md`
+- `guides/security-guide.md`
+- `guides/chaos-guide.md`
+- `guides/gitops-guide.md`
 
-```
-aks-landing-zone-lab/
-│
-├── main.tf                        Root module — orchestrates all landing zones
-├── variables.tf                   All input variables
-├── outputs.tf                     Cluster info, endpoints, kubeconfig
-├── locals.tf                      Naming, tags, computed values
-├── backend.tf                     Azure Storage remote state
-├── providers.tf                   azurerm, helm, random
-│
-├── environments/                  Per-environment variable files
-│   ├── dev.tfvars                   Budget-safe defaults (~$5/day)
-│   ├── lab.tfvars                   Extended features (~$8/day)
-│   └── prod.tfvars                  Production reference profile
-│
-├── landing-zones/                 7 landing zones (data optional)
-│   ├── networking/                  Hub-spoke VNets, peering, NSGs
-│   ├── aks-platform/                AKS cluster, ACR, ingress
-│   ├── management/                  Log Analytics, alerts, budgets
-│   ├── security/                    Key Vault, policies, Defender
-│   ├── governance/                  Custom Azure Policies
-│   ├── identity/                    Workload Identity, managed IDs
-│   └── data/                        Optional SQL + private endpoint
-│
-├── modules/                       16 reusable Terraform modules
-│
-├── k8s/                           Kubernetes manifests
-│   ├── namespaces/                  Namespace defs, quotas, RBAC
-│   ├── apps/                        15 sample workloads
-│   ├── security/                    Network policies, PSA
-│   ├── autoscaling/                 HPA, KEDA, load tests
-│   ├── storage/                     StorageClasses
-│   ├── monitoring/                  Prometheus scrape configs
-│   ├── chaos/                       Chaos Mesh experiments
-│   ├── backup/                      Velero schedules
-│   └── gitops/                      Flux v2 configuration
-│
-├── scripts/                       PowerShell operational scripts
-└── wiki/                          Documentation (you are here)
-    ├── guides/                    Lab, monitoring, security guides
-    ├── images/                    SVG diagrams and images
-    ├── architecture/              Architecture deep-dives
-    ├── landing-zones/             Landing zone details
-    ├── modules/                   Module index
-    └── reference/                 Variables, outputs, naming
+## Environment Snapshot
+
+Source of truth: `environments/*.tfvars`.
+
+| Feature | Dev | Lab | Prod |
+|:--|:--:|:--:|:--:|
+| Budget amount | `100` | `130` | `1200` |
+| Prometheus / Grafana | Off / Off | On / On | On / On |
+| Defender | Off | Off | On |
+| DNS zone | Off | On | On |
+| SQL database | Off | On | On |
+| Firewall | Off | Off | On |
+| KEDA | Off | On | On |
+| Azure Files | Off | On | On |
+| App Insights | Off | Off | On |
+
+## App Runbook Model
+
+The web app now fuses Wiki pages under Modules:
+
+- Open `app/src/lib/wiki.ts` for generation logic.
+- Runbook UI lives under `/labs` and `/labs/[page]`.
+- Module completion can be auto-derived from pages or manually checked.
+- Page/module progress is persisted client-side and visible in the progress panel.
+
+## Quick Commands
+
+```powershell
+# Deploy infra
+.\scripts\deploy.ps1 -Environment lab
+
+# Build app image and deploy workloads
+.\scripts\build-app.ps1 -Environment lab -Tag latest
+.\scripts\deploy-workloads.ps1 -Environment lab -ImageTag latest
+
+# Destroy lab
+.\scripts\destroy.ps1 -Environment lab -AutoApprove
 ```
 
----
+## Notes
 
-## 🌍 Environment Comparison
-
-<table>
-<tr>
-<th></th>
-<th align="center">🧪 Dev</th>
-<th align="center">🔬 Lab</th>
-<th align="center">🏭 Prod</th>
-</tr>
-<tr><td><b>Est. Cost</b></td><td align="center">~$5/day</td><td align="center">~$8/day</td><td align="center">~$25/day</td></tr>
-<tr><td><b>Prometheus</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
-<tr><td><b>Grafana</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
-<tr><td><b>Defender</b></td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
-<tr><td><b>DNS Zone</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
-<tr><td><b>SQL Database</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
-<tr><td><b>Firewall</b></td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
-<tr><td><b>KEDA / Azure Files / App Insights</b></td><td align="center">Reserved vars</td><td align="center">Reserved vars</td><td align="center">Reserved vars</td></tr>
-</table>
-
----
-
-## 🤝 Contributing
-
-1. Create a feature branch from `main`
-2. Make changes and test with `terraform plan -var-file="environments/dev.tfvars"`
-3. Submit a pull request
-4. CI runs `terraform fmt -check`, `terraform validate`, and `terraform plan`
-
----
-
-<div align="center">
-
-**[⬆ Back to Top](#)**
-
-</div>
+- Scripts support `dev|lab|prod|staging`; only dev/lab/prod tfvars are included by default.
+- Workload deploy validates rendered tokens and skips KEDA scaledobject when CRDs are missing.
+- Destroy keeps `rg-terraform-state` by design so backend state is not deleted accidentally.

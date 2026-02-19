@@ -70,7 +70,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+# -- Helpers -----------------------------------------------------------------
 
 function Write-Info    { param([string]$Msg) Write-Host "[INFO]    $Msg" -ForegroundColor Cyan }
 function Write-Success { param([string]$Msg) Write-Host "[OK]      $Msg" -ForegroundColor Green }
@@ -98,6 +98,20 @@ function Set-TemplateTokens {
     Set-Content -Path $Path -Value $content -NoNewline
 }
 
+function Assert-NoTemplateTokens {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    $content = Get-Content -Path $Path -Raw
+    $matches = [regex]::Matches($content, "__[A-Z0-9_]+__")
+    if ($matches.Count -gt 0) {
+        $tokens = @($matches | ForEach-Object { $_.Value } | Sort-Object -Unique)
+        throw "Unresolved template tokens in ${Path}: $($tokens -join ', ')"
+    }
+}
+
 function Resolve-TerraformOutputValue {
     param(
         [Parameter(Mandatory = $true)]
@@ -120,7 +134,7 @@ function Resolve-TerraformOutputValue {
     return [string]$value
 }
 
-# ── Resolve paths ────────────────────────────────────────────────────────────
+# -- Resolve paths -----------------------------------------------------------
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $rootDir   = Split-Path -Parent $scriptDir
@@ -135,9 +149,9 @@ if (-not (Test-Path $ManifestRoot)) {
 }
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║          AKS Landing Zone Lab - Deploy Workloads            ║" -ForegroundColor Cyan
-Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host "+------------------------------------------------------------+" -ForegroundColor Cyan
+Write-Host "|          AKS Landing Zone Lab - Deploy Workloads          |" -ForegroundColor Cyan
+Write-Host "+------------------------------------------------------------+" -ForegroundColor Cyan
 Write-Host ""
 
 if ($DryRun) {
@@ -218,7 +232,6 @@ if (-not $SkipManifestRendering) {
     New-Item -ItemType Directory -Path $renderedManifestRoot -Force | Out-Null
     Copy-Item -Path (Join-Path $ManifestRoot "*") -Destination $renderedManifestRoot -Recurse -Force
 
-    $learningHubManifest = Join-Path $renderedManifestRoot "apps\learning-hub.yaml"
     $tokens = @{
         "__ACR_LOGIN_SERVER__"             = $values.acr_login_server
         "__LEARNING_HUB_IMAGE_TAG__"       = $ImageTag
@@ -227,8 +240,21 @@ if (-not $SkipManifestRendering) {
         "__SQL_DATABASE_NAME__"           = $values.sql_database_name
         "__KEY_VAULT_NAME__"              = $values.key_vault_name
         "__TENANT_ID__"                   = $values.tenant_id
+        "__ENVIRONMENT__"                 = $Environment
     }
-    Set-TemplateTokens -Path $learningHubManifest -Tokens $tokens
+
+    $templatedManifests = @(
+        (Join-Path $renderedManifestRoot "apps\learning-hub.yaml"),
+        (Join-Path $renderedManifestRoot "apps\db-seed-job.yaml"),
+        (Join-Path $renderedManifestRoot "autoscaling\hpa-learning-hub.yaml")
+    )
+
+    foreach ($manifestPath in $templatedManifests) {
+        if (Test-Path $manifestPath) {
+            Set-TemplateTokens -Path $manifestPath -Tokens $tokens
+            Assert-NoTemplateTokens -Path $manifestPath
+        }
+    }
 
     $ManifestRoot = $renderedManifestRoot
     Write-Success "Rendered manifests: $ManifestRoot"
@@ -238,7 +264,7 @@ if (-not $SkipManifestRendering) {
     Write-Host ""
 }
 
-# ── Verify kubectl works ────────────────────────────────────────────────────
+# -- Verify kubectl works ----------------------------------------------------
 
 Write-Info "Verifying kubectl connection..."
 try {
@@ -252,7 +278,24 @@ try {
 }
 Write-Host ""
 
-# ── Define apply order ──────────────────────────────────────────────────────
+$kedaCrdsInstalled = $false
+try {
+    kubectl get crd scaledobjects.keda.sh triggerauthentications.keda.sh 1>$null 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        $kedaCrdsInstalled = $true
+    }
+} catch {
+    $kedaCrdsInstalled = $false
+}
+
+if ($kedaCrdsInstalled) {
+    Write-Info "KEDA CRDs detected; autoscaling/keda-scaledobject.yaml will be applied."
+} else {
+    Write-Warn "KEDA CRDs not detected; autoscaling/keda-scaledobject.yaml will be skipped."
+}
+Write-Host ""
+
+# -- Define apply order ------------------------------------------------------
 
 $applyOrder = @(
     @{ Name = "Namespaces";  Path = "namespaces"  }
@@ -287,13 +330,22 @@ foreach ($stage in $applyOrder) {
             @{ Expression = { if ($_.Name -eq "learning-hub.yaml") { 0 } elseif ($_.Name -eq "db-seed-job.yaml") { 999 } else { 100 } } }, `
             @{ Expression = { $_.Name } })
     }
+
+    if ($stage.Path -eq "autoscaling" -and -not $kedaCrdsInstalled) {
+        $kedaManifest = @($yamlFiles | Where-Object { $_.Name -eq "keda-scaledobject.yaml" })
+        if ($kedaManifest.Count -gt 0) {
+            Write-Warn "Skipping keda-scaledobject.yaml because KEDA CRDs are not installed in this cluster."
+            $yamlFiles = @($yamlFiles | Where-Object { $_.Name -ne "keda-scaledobject.yaml" })
+        }
+    }
+
     if ($yamlFiles.Count -eq 0) {
         Write-Warn "Skipping '$($stage.Name)' - no YAML files found."
         $results += @{ Stage = $stage.Name; Status = "Skipped"; Files = 0 }
         continue
     }
 
-    Write-Info "Applying $($stage.Name) ($($yamlFiles.Count) file(s))..."
+    Write-Info "Applying $($stage.Name) - $($yamlFiles.Count) files..."
 
     $stageSuccess = $true
     foreach ($file in $yamlFiles) {
@@ -334,7 +386,7 @@ foreach ($stage in $applyOrder) {
     Write-Host ""
 }
 
-# ── Wait for deployments ────────────────────────────────────────────────────
+# -- Wait for deployments ----------------------------------------------------
 
 if (-not $DryRun) {
     Write-Info "Waiting for deployments to be ready (timeout: ${WaitTimeout}s)..."
@@ -374,12 +426,12 @@ if (-not $DryRun) {
     }
 }
 
-# ── Status summary ──────────────────────────────────────────────────────────
+# -- Status summary ----------------------------------------------------------
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║          Workload Deployment Summary                         ║" -ForegroundColor Green
-Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host "+------------------------------------------------------------+" -ForegroundColor Green
+Write-Host "|                Workload Deployment Summary                 |" -ForegroundColor Green
+Write-Host "+------------------------------------------------------------+" -ForegroundColor Green
 Write-Host ""
 
 foreach ($result in $results) {
@@ -391,7 +443,7 @@ foreach ($result in $results) {
     }
     Write-Host "  $($result.Stage.PadRight(14))" -NoNewline -ForegroundColor White
     Write-Host "$($result.Status.PadRight(10))" -NoNewline -ForegroundColor $statusColor
-    Write-Host "($($result.Files) files)" -ForegroundColor Gray
+    Write-Host ("(" + $result.Files + " files)") -ForegroundColor Gray
 }
 
 Write-Host ""

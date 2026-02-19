@@ -4,412 +4,166 @@
 
 <br/>
 
-[![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.5-844fba?style=for-the-badge&logo=terraform&logoColor=white)](#-quick-start)
-[![AzureRM](https://img.shields.io/badge/AzureRM-~%3E4.0-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](#-architecture)
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.32-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](#-architecture)
-[![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)](LICENSE)
+[![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.5-844fba?style=for-the-badge&logo=terraform&logoColor=white)](#quick-start)
+[![AzureRM](https://img.shields.io/badge/AzureRM-~%3E4.0-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](#latest-configuration)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.32-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](#latest-configuration)
+[![Runbook](https://img.shields.io/badge/Runbook-1000_Pages-ff4ea8?style=for-the-badge)](#learning-hub-app-and-fused-runbook)
 
-**Enterprise-grade AKS infrastructure built with Terraform landing zones**
+Infrastructure as code for AKS landing zones, plus a full web app to run the lab operationally.
 
-[Architecture](#-architecture) · [Quick Start](#-quick-start) · [Environments](#-environments) · [Docs](#-documentation) · [Lab Guide](wiki/guides/lab-guide.md)
-
----
+[Quick Start](#quick-start) | [Latest Configuration](#latest-configuration) | [Environments](#environments) | [Docs](#documentation)
 
 </div>
 
-## 🚀 What Is This?
+## What This Repository Contains
 
-A **production-ready** Azure Kubernetes Service deployment following Microsoft's [Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/) and [AKS Landing Zone Accelerator](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/scenarios/app-platform/aks/landing-zone-accelerator) patterns. Everything is infrastructure as code — from hub-spoke networking to pod security policies.
+- Terraform landing zones for an enterprise-style AKS foundation
+- Kubernetes manifests for apps, autoscaling, security, storage, monitoring, chaos, and GitOps
+- PowerShell automation for bootstrap, deploy, build, workloads, and destroy
+- Next.js Learning Hub app with module tracking, journal APIs, and fused module runbooks
 
-> **💡 Perfect for:** Platform engineers learning enterprise AKS patterns, teams building landing zone foundations, or anyone preparing for real-world Kubernetes on Azure.
+## Latest Configuration
 
-<br/>
+Current baseline from this repo:
 
-## 🏗 Architecture
+| Area | Value |
+|:--|:--|
+| Terraform | `>= 1.5.0` |
+| Providers | `azurerm ~> 4.0`, `helm ~> 2.12`, `random ~> 3.5` |
+| AKS version | `1.32` |
+| Landing zones | 7 total (`data` is optional) |
+| Terraform modules | 16 top-level modules + 11 nested submodules |
+| Runbook model | 1000 pages, 50 modules, 20 pages per module |
+| Runbook location | `app/src/lib/wiki.ts` rendered under `/labs` |
+
+## Architecture
 
 <div align="center">
 <img src="wiki/images/architecture-overview.svg" alt="Architecture Overview" width="100%"/>
 </div>
 
-<br/>
-
-### Landing Zones
-
-The infrastructure is organized into **seven landing zones** (the data zone is optional), each owning a specific platform concern:
-
-<table>
-<tr>
-<td width="33%">
-
-**🌐 Networking**
-> Hub-spoke VNets, NSGs, route tables, VNet peering, optional Azure Firewall
-
-</td>
-<td width="33%">
-
-**⎈ AKS Platform**
-> AKS cluster with system + user pools, ACR, NGINX ingress, Azure CNI Overlay
-
-</td>
-<td width="33%">
-
-**📈 Management**
-> Log Analytics, Container Insights, alert rules, budget alerts, Prometheus + Grafana
-
-</td>
-</tr>
-<tr>
-<td>
-
-**🔐 Security**
-> Azure Policy baseline, Key Vault + CSI driver, Defender for Containers
-
-</td>
-<td>
-
-**📋 Governance**
-> Custom policies: deny missing limits, enforce ACR-only image sources
-
-</td>
-<td>
-
-**🪪 Identity**
-> Workload Identity Federation, managed identities, federated credentials
-
-</td>
-</tr>
-<tr>
-<td colspan="3">
-
-**🗄 Data (Optional)**
-> Azure SQL Database, private endpoint + private DNS, Key Vault connection string secret
-
-</td>
-</tr>
-</table>
-
-### Deployment Flow
-
 <div align="center">
 <img src="wiki/images/deployment-flow.svg" alt="Deployment Flow" width="100%"/>
 </div>
 
-<br/>
-
-### Network Design
+Core network plan:
 
 | Network | CIDR | Purpose |
-|:--------|:-----|:--------|
-| Hub VNet | `10.0.0.0/16` | Shared services, management, firewall |
-| Spoke VNet | `10.1.0.0/16` | AKS system pool, user pool, ingress |
-| Pod CIDR | `192.168.0.0/16` | Azure CNI Overlay pod IPs |
-| Service CIDR | `172.16.0.0/16` | Kubernetes ClusterIP services |
+|:--|:--|:--|
+| Hub VNet | `10.0.0.0/16` | Shared services and management |
+| Spoke VNet | `10.1.0.0/16` | AKS system/user/ingress workloads |
+| Pod CIDR | `192.168.0.0/16` | Azure CNI Overlay pods |
+| Service CIDR | `172.16.0.0/16` | ClusterIP services |
 
-<br/>
+## Environments
 
-## ⚡ Quick Start
+Values below are aligned with `environments/dev.tfvars`, `environments/lab.tfvars`, and `environments/prod.tfvars`.
 
-### Prerequisites
+| Setting | Dev | Lab | Prod |
+|:--|:--:|:--:|:--:|
+| File | `environments/dev.tfvars` | `environments/lab.tfvars` | `environments/prod.tfvars` |
+| Budget (`budget_amount`) | `100` USD/mo | `130` USD/mo | `1200` USD/mo |
+| Node pools (system/user min-max) | `1-2` / `1-3` | `1-2` / `1-3` | `2-3` / `2-5` |
+| VM sizes | `B2s` / `B2s` | `B2s` / `B2s` | `B2s` / `B4ms` |
+| Managed Prometheus | Off | On | On |
+| Managed Grafana | Off | On | On |
+| Defender for Containers | Off | Off | On |
+| DNS zone | Off | On | On |
+| SQL database | Off | On (`eastus2`) | On (`eastus2`) |
+| Azure Firewall | Off | Off | On |
+| KEDA | Off | On | On |
+| Azure Files | Off | On | On |
+| App Insights | Off | Off | On |
 
-| Tool | Version | Required |
-|:-----|:--------|:--------:|
-| Azure CLI | Latest | ✅ |
-| Terraform | ≥ 1.5 | ✅ |
-| kubectl | Latest | ✅ |
-| Helm | ≥ 3.x | ✅ |
-| PowerShell | 7.x | For scripts |
+## Quick Start
 
-### Option 1: Script Deploy (Recommended)
+Prereqs:
+
+- Azure CLI
+- Terraform >= 1.5
+- kubectl
+- Helm
+- PowerShell 7+
+
+Deploy infra (lab):
 
 ```powershell
-# Clone and authenticate
-git clone https://github.com/Jamonygr/aks-landing-zone-lab.git
-cd aks-landing-zone-lab
 az login
-az account set --subscription "<your-subscription-id>"
+az account set --subscription "<subscription-id>"
 
-# One-command deploy
 .\scripts\deploy.ps1 -Environment lab
+.\scripts\get-credentials.ps1 -Environment lab
 ```
 
-### Option 2: Manual Terraform
+Build and deploy app workloads:
 
 ```powershell
-# Initialize
-terraform init
-
-# Preview changes
-terraform plan -var-file="environments/lab.tfvars"
-
-# Deploy (~15 min)
-terraform apply -var-file="environments/lab.tfvars"
-
-# Connect to cluster
-terraform output -raw kubeconfig_command | Invoke-Expression
-kubectl get nodes
+.\scripts\build-app.ps1 -Environment lab -Tag latest
+.\scripts\deploy-workloads.ps1 -Environment lab -ImageTag latest
 ```
 
-### Deploy Sample Workloads
+Notes about workload deploy behavior:
+
+- `scripts/deploy-workloads.ps1` renders manifest tokens from Terraform outputs.
+- It validates unresolved template tokens before apply.
+- It skips `autoscaling/keda-scaledobject.yaml` if KEDA CRDs are not installed.
+
+Destroy environment:
 
 ```powershell
-# Namespaces, RBAC, resource quotas
-kubectl apply -f k8s/namespaces/
-
-# Sample applications
-kubectl apply -f k8s/apps/
-
-# Verify everything is running
-kubectl get pods -A
+.\scripts\destroy.ps1 -Environment lab -AutoApprove
 ```
 
-### Tear Down
+State backend cleanup is intentionally manual:
 
 ```powershell
-terraform destroy -var-file="environments/lab.tfvars"
+az group delete --name rg-terraform-state --yes
 ```
 
-<br/>
+## Learning Hub App And Fused Runbook
 
-## 🌍 Environments
+The wiki/runbook model is fused under Modules in the app:
 
-Three pre-built environment profiles with different feature toggles:
+- `1000` generated runbook pages
+- grouped into `50` modules with `20` pages each
+- page and module completion tracking in browser storage
+- module-level status/checkpoint tracking backed by SQL APIs (with in-memory fallback)
 
-<table>
-<tr>
-<th></th>
-<th align="center">🧪 Dev</th>
-<th align="center">🔬 Lab</th>
-<th align="center">🏭 Prod</th>
-</tr>
-<tr><td><b>File</b></td><td><code>environments/dev.tfvars</code></td><td><code>environments/lab.tfvars</code></td><td><code>environments/prod.tfvars</code></td></tr>
-<tr><td><b>System Pool</b></td><td align="center">1 node</td><td align="center">1 node</td><td align="center">2 nodes</td></tr>
-<tr><td><b>User Pool</b></td><td align="center">1–2 nodes</td><td align="center">1–3 nodes</td><td align="center">2–5 nodes</td></tr>
-<tr><td><b>Firewall</b></td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
-<tr><td><b>Prometheus</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
-<tr><td><b>Grafana</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
-<tr><td><b>Defender</b></td><td align="center">❌</td><td align="center">❌</td><td align="center">✅</td></tr>
-<tr><td><b>DNS Zone</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
-<tr><td><b>SQL Database</b></td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td></tr>
-<tr><td><b>Route Internet via Firewall</b></td><td align="center">N/A</td><td align="center">N/A</td><td align="center">❌ (default)</td></tr>
-<tr><td><b>KEDA / Azure Files / App Insights</b></td><td align="center">Reserved vars</td><td align="center">Reserved vars</td><td align="center">Reserved vars</td></tr>
-<tr><td><b>Est. Cost</b></td><td align="center">~$5/day</td><td align="center">~$8/day</td><td align="center">~$25/day</td></tr>
-</table>
+Start at:
 
-<br/>
+- `/labs` for module tracker + runbook index
+- `/labs#module-runbook` for module/page navigation
+- `/journal` for operations entries
 
-## 🛠 Operational Scripts
+## Repository Structure
 
-| Script | Description |
-|:-------|:------------|
-| `scripts/bootstrap.ps1` | Install prerequisites, authenticate, create state backend |
-| `scripts/build-app.ps1` | Build and push the Learning Hub app image to ACR |
-| `scripts/deploy.ps1` | Full Terraform init → plan → apply pipeline |
-| `scripts/destroy.ps1` | Safe teardown with confirmation prompts |
-| `scripts/get-credentials.ps1` | Fetch AKS kubeconfig and verify cluster access |
-| `scripts/deploy-workloads.ps1` | Apply all K8s manifests in order |
-| `scripts/cleanup-workloads.ps1` | Remove deployed workloads |
-| `scripts/start-lab.ps1` | Start stopped AKS cluster (resume lab) |
-| `scripts/stop-lab.ps1` | Deallocate cluster to save costs overnight |
-| `scripts/cost-check.ps1` | Show current resource costs and budget status |
-
-<br/>
-
-## 📦 Kubernetes Manifests
-
-Pre-built manifests for learning and testing:
-
-<table>
-<tr>
-<td width="50%">
-
-**Applications** (`k8s/apps/`)
-- `hello-web` — Simple web app for ingress testing
-- `metrics-app` — Custom metrics endpoint for HPA
-- `log-generator` — Structured logs for Log Analytics
-- `multi-container` — Sidecar pattern demo
-- `crashloop-pod` — Troubleshooting exercise
-- `stress-cpu` / `stress-memory` — Autoscaler testing
-
-</td>
-<td width="50%">
-
-**Platform** (`k8s/`)
-- `namespaces/` — Namespaces, RBAC, quotas, limit ranges
-- `autoscaling/` — HPA, KEDA, load test jobs
-- `security/` — Network policies, pod security admission
-- `storage/` — StorageClasses (Azure Disk, Azure Files)
-- `monitoring/` — Prometheus scrape configs
-- `chaos/` — Chaos Mesh experiments
-- `gitops/` — Flux v2 source, kustomization, alerts
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-## 📁 Repository Structure
-
-```
+```text
 aks-landing-zone-lab/
-│
-├── main.tf                    # Root module — invokes all landing zones
-├── variables.tf               # Input variables with descriptions
-├── locals.tf                  # Computed values and naming conventions
-├── outputs.tf                 # Cluster endpoints, IPs, resource IDs
-├── providers.tf               # AzureRM ~>4.0, Helm ~>2.12, Random ~>3.5
-├── backend.tf                 # Remote state configuration
-├── terraform.tfvars.example   # Template for custom variables
-│
-├── environments/              # Pre-built variable files
-│   ├── dev.tfvars
-│   ├── lab.tfvars
-│   └── prod.tfvars
-│
-├── landing-zones/             # Seven platform landing zones (data optional)
-│   ├── networking/            #   Hub-spoke VNets, NSGs, peering
-│   ├── aks-platform/          #   AKS cluster, ACR, ingress
-│   ├── management/            #   Monitoring, alerts, Prometheus
-│   ├── security/              #   Key Vault, policies, Defender
-│   ├── governance/            #   Custom Azure Policy definitions
-│   ├── identity/              #   Workload Identity, managed IDs
-│   └── data/                  #   Optional SQL database and private endpoint
-│
-├── modules/                   # Reusable Terraform modules
-│   ├── aks/                   ├── networking/
-│   ├── acr/                   ├── monitoring/
-│   ├── keyvault/              ├── firewall/
-│   ├── ingress/               ├── policy/
-│   ├── rbac/                  ├── private-endpoint/
-│   ├── storage/               ├── sql-database/
-│   ├── naming/                ├── cost-management/
-│   └── resource-group/        └── firewall-rules/
-│
-├── k8s/                       # Kubernetes manifests
-│   ├── apps/                  #   Sample applications
-│   ├── namespaces/            #   Namespaces, RBAC, quotas
-│   ├── autoscaling/           #   HPA, KEDA, load tests
-│   ├── security/              #   Network policies, PSA
-│   ├── storage/               #   StorageClasses
-│   ├── monitoring/            #   Scrape configs
-│   ├── chaos/                 #   Chaos Mesh experiments
-│   ├── gitops/                #   Flux v2 resources
-│   └── backup/                #   Velero schedules
-│
-├── scripts/                   # PowerShell operational scripts
-└── wiki/                      # Documentation, guides, and images
+├── environments/                # dev/lab/prod tfvars
+├── landing-zones/               # networking, aks-platform, management, security, governance, identity, data
+├── modules/                     # 16 reusable Terraform modules
+├── k8s/                         # apps, autoscaling, security, monitoring, storage, chaos, gitops, backup
+├── scripts/                     # deploy/destroy/build/workload operations
+├── app/                         # Next.js AKS Learning Hub web app
+└── wiki/                        # documentation and SVG diagrams
 ```
 
-<br/>
+## Documentation
 
-## 🔒 Security Features
+- `wiki/README.md`
+- `wiki/landing-zones/README.md`
+- `wiki/modules/README.md`
+- `wiki/guides/lab-guide.md`
+- `wiki/reference/variables.md`
 
-<table>
-<tr>
-<td>
-
-| Layer | Controls |
-|:------|:---------|
-| **Network** | NSG per subnet, default-deny inbound, optional Azure Firewall |
-| **Cluster** | Calico network policies, Azure RBAC for K8s |
-| **Pod** | Pod Security Admission (restricted), resource limits/quotas |
-| **Secrets** | Azure Key Vault + CSI Secrets Store Driver |
-| **Governance** | Azure Policy: deny missing limits, enforce ACR source |
-| **Runtime** | Defender for Containers (optional), audit logging |
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-## 📊 Monitoring & Observability
-
-| Component | Details |
-|:----------|:--------|
-| **Log Analytics** | Centralized workspace for all diagnostic logs |
-| **Container Insights** | Node/pod metrics, live container logs, recommended alerts |
-| **Alert Rules** | Node CPU > 80%, pod restart count, OOM kills |
-| **Prometheus** | Azure Managed Prometheus (optional, enabled in lab/prod) |
-| **Grafana** | Azure Managed Grafana v11 (optional, enabled in lab/prod) |
-| **Budget Alerts** | Cost threshold notifications at 80%, 100%, 120% |
-
-<br/>
-
-## 💰 Cost Management
-
-| Feature | Description |
-|:--------|:------------|
-| **Auto-shutdown** | `stop-lab.ps1` deallocates cluster to eliminate compute costs |
-| **B-series VMs** | Burstable SKUs for dev/lab to minimize baseline cost |
-| **Budget alerts** | Azure Cost Management alerts at configurable thresholds |
-| **Cost check** | `cost-check.ps1` shows real-time spend and forecast |
-| **Optional features** | Firewall, Defender, DNS Zone only enabled where needed |
-
-<br/>
-
-## 📖 Documentation
-
-<table>
-<tr>
-<td width="50%">
-
-### Guides
-- 📘 [Lab Guide](wiki/guides/lab-guide.md) — 8-day structured curriculum
-- 🏛 [Architecture](wiki/guides/architecture.md) — Network topology and components
-- 📊 [Monitoring Guide](wiki/guides/monitoring-guide.md) — Alerts, dashboards, queries
-- 🔒 [Security Guide](wiki/guides/security-guide.md) — Defense-in-depth controls
-
-</td>
-<td width="50%">
-
-### Advanced Topics
-- 💰 [Cost Optimization](wiki/guides/cost-optimization.md) — Budget controls and savings
-- 💥 [Chaos Guide](wiki/guides/chaos-guide.md) — Chaos Mesh fault injection
-- 🔄 [GitOps Guide](wiki/guides/gitops-guide.md) — Flux v2 automation
-- 🔧 [Troubleshooting](wiki/guides/troubleshooting.md) — Common issues and fixes
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-## ✅ Validation
+## Validation
 
 ```powershell
-# Format check
 terraform fmt -check -recursive
-
-# Validate configuration
 terraform validate
-
-# View planned changes
 terraform plan -var-file="environments/lab.tfvars"
 ```
 
-## 🤝 Contributing
+## License
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -m 'Add my feature'`)
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a Pull Request
-
-<br/>
-
----
-
-<div align="center">
-
-**[⬆ Back to Top](#)**
-
-<br/>
-
-Made with ☁️ on Azure
-
-<br/>
-
-[![MIT License](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
-
-</div>
+MIT (`LICENSE`)

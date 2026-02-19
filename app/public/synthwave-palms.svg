@@ -1,0 +1,72 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="groundGlow" x1="960" y1="740" x2="960" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF4EA8" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#120421" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="edgeGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#39F4FF" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#FF59B1" stop-opacity="0.7"/>
+    </linearGradient>
+    <filter id="neon" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="0" y="740" width="1920" height="340" fill="url(#groundGlow)"/>
+  <rect x="0" y="900" width="1920" height="180" fill="#080114" fill-opacity="0.82"/>
+
+  <g opacity="0.92">
+    <!-- Left far palm -->
+    <path d="M78 1080 C120 900 150 760 176 620" stroke="#05000D" stroke-width="26" stroke-linecap="round"/>
+    <path d="M176 620 C112 586 64 570 0 594 C66 600 122 618 186 654" fill="#05000D"/>
+    <path d="M176 620 C232 570 290 552 356 568 C298 596 248 626 184 654" fill="#05000D"/>
+    <path d="M176 620 C126 536 92 470 74 406 C118 474 160 534 198 614" fill="#05000D"/>
+    <path d="M176 620 C236 546 282 496 342 448 C306 526 252 576 198 620" fill="#05000D"/>
+    <path d="M176 620 C168 706 170 772 186 848 C200 778 206 708 194 620" fill="#05000D"/>
+  </g>
+
+  <g opacity="0.95">
+    <!-- Left hero palm -->
+    <path d="M178 1080 C232 850 294 662 372 488" stroke="#060010" stroke-width="42" stroke-linecap="round"/>
+    <path d="M372 488 C250 438 152 428 32 470 C162 480 274 512 386 560" fill="#060010"/>
+    <path d="M372 488 C486 430 602 418 740 446 C612 486 506 528 392 564" fill="#060010"/>
+    <path d="M372 488 C292 382 228 304 178 202 C254 294 330 390 396 486" fill="#060010"/>
+    <path d="M372 488 C474 386 562 320 670 248 C602 372 506 454 396 500" fill="#060010"/>
+    <path d="M372 488 C354 614 354 734 376 874 C404 744 416 618 398 488" fill="#060010"/>
+
+    <path d="M178 1080 C232 850 294 662 372 488" stroke="url(#edgeGlow)" stroke-width="3.5" stroke-linecap="round" filter="url(#neon)"/>
+    <path d="M372 488 C250 438 152 428 32 470" stroke="url(#edgeGlow)" stroke-width="2.4" stroke-linecap="round" filter="url(#neon)"/>
+    <path d="M372 488 C486 430 602 418 740 446" stroke="url(#edgeGlow)" stroke-width="2.4" stroke-linecap="round" filter="url(#neon)"/>
+    <path d="M372 488 C292 382 228 304 178 202" stroke="url(#edgeGlow)" stroke-width="2.2" stroke-linecap="round" filter="url(#neon)"/>
+    <path d="M372 488 C474 386 562 320 670 248" stroke="url(#edgeGlow)" stroke-width="2.2" stroke-linecap="round" filter="url(#neon)"/>
+  </g>
+
+  <g opacity="0.95">
+    <!-- Right hero palm -->
+    <path d="M1732 1080 C1680 856 1622 670 1548 500" stroke="#060010" stroke-width="42" stroke-linecap="round"/>
+    <path d="M1548 500 C1678 440 1788 428 1918 462 C1780 484 1664 518 1536 578" fill="#060010"/>
+    <path d="M1548 500 C1438 438 1330 422 1204 448 C1322 490 1426 536 1544 576" fill="#060010"/>
+    <path d="M1548 500 C1628 392 1692 312 1746 212 C1668 300 1592 392 1526 498" fill="#060010"/>
+    <path d="M1548 500 C1452 394 1364 328 1258 260 C1320 382 1414 466 1522 510" fill="#060010"/>
+    <path d="M1548 500 C1568 632 1568 746 1548 880 C1522 742 1514 626 1528 500" fill="#060010"/>
+
+    <path d="M1732 1080 C1680 856 1622 670 1548 500" stroke="url(#edgeGlow)" stroke-width="3.5" stroke-linecap="round" filter="url(#neon)"/>
+    <path d="M1548 500 C1678 440 1788 428 1918 462" stroke="url(#edgeGlow)" stroke-width="2.4" stroke-linecap="round" filter="url(#neon)"/>
+    <path d="M1548 500 C1438 438 1330 422 1204 448" stroke="url(#edgeGlow)" stroke-width="2.4" stroke-linecap="round" filter="url(#neon)"/>
+    <path d="M1548 500 C1628 392 1692 312 1746 212" stroke="url(#edgeGlow)" stroke-width="2.2" stroke-linecap="round" filter="url(#neon)"/>
+    <path d="M1548 500 C1452 394 1364 328 1258 260" stroke="url(#edgeGlow)" stroke-width="2.2" stroke-linecap="round" filter="url(#neon)"/>
+  </g>
+
+  <g opacity="0.86">
+    <!-- Right far palm -->
+    <path d="M1866 1080 C1828 916 1802 786 1778 668" stroke="#05000D" stroke-width="24" stroke-linecap="round"/>
+    <path d="M1778 668 C1728 620 1688 598 1638 602 C1694 624 1738 656 1784 702" fill="#05000D"/>
+    <path d="M1778 668 C1836 618 1882 600 1940 608 C1882 636 1834 666 1778 706" fill="#05000D"/>
+    <path d="M1778 668 C1738 594 1712 538 1700 480 C1732 544 1762 604 1788 668" fill="#05000D"/>
+  </g>
+</svg>

@@ -9,7 +9,7 @@ metadata:
   namespace: lab-apps
   labels:
     app: learning-hub
-    environment: lab
+    environment: __ENVIRONMENT__
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

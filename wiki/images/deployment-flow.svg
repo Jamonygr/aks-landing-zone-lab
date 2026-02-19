@@ -1,55 +1,96 @@
-<svg width="1400" height="280" viewBox="0 0 1400 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="360" viewBox="0 0 1200 360" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="flowbg" x1="0" y1="0" x2="1400" y2="280" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0F172A"/>
-      <stop offset="1" stop-color="#1E293B"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#120126"/>
+      <stop offset="52%" stop-color="#2a0954"/>
+      <stop offset="100%" stop-color="#070111"/>
     </linearGradient>
-    <marker id="flowarrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
-      <path d="M0,0 L9,4.5 L0,9 Z" fill="#CBD5E1"/>
-    </marker>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd29f"/>
+      <stop offset="45%" stop-color="#ff4ea8"/>
+      <stop offset="100%" stop-color="#a56fff"/>
+    </linearGradient>
+    <linearGradient id="grid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(57,244,255,0.75)"/>
+      <stop offset="100%" stop-color="rgba(57,244,255,0.05)"/>
+    </linearGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+    <clipPath id="sunClip">
+      <circle cx="924" cy="104" r="65"/>
+    </clipPath>
   </defs>
 
-  <rect width="1400" height="280" rx="18" fill="url(#flowbg)"/>
-  <text x="52" y="52" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Deployment Flow</text>
+  <rect width="1200" height="360" fill="url(#bg)"/>
 
-  <g transform="translate(54,86)">
-    <rect width="214" height="132" rx="12" fill="#0C4A6E" stroke="#38BDF8"/>
-    <text x="20" y="46" fill="#E0F2FE" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">1. Bootstrap</text>
-    <text x="20" y="77" fill="#BAE6FD" font-family="Consolas, monospace" font-size="14">.\scripts\bootstrap.ps1</text>
-    <text x="20" y="103" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="13">Tools, login, state backend</text>
+  <circle cx="924" cy="104" r="65" fill="url(#sun)" filter="url(#softGlow)" opacity="0.9"/>
+  <circle cx="924" cy="104" r="65" fill="url(#sun)"/>
+  <g clip-path="url(#sunClip)" stroke="rgba(255,255,255,0.35)" stroke-width="2">
+    <line x1="859" y1="86" x2="989" y2="86"/>
+    <line x1="859" y1="106" x2="989" y2="106"/>
+    <line x1="859" y1="126" x2="989" y2="126"/>
+    <line x1="859" y1="146" x2="989" y2="146"/>
   </g>
 
-  <g transform="translate(320,86)">
-    <rect width="214" height="132" rx="12" fill="#14532D" stroke="#4ADE80"/>
-    <text x="20" y="46" fill="#DCFCE7" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">2. Deploy</text>
-    <text x="20" y="77" fill="#BBF7D0" font-family="Consolas, monospace" font-size="14">.\scripts\deploy.ps1</text>
-    <text x="20" y="103" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="13">Terraform init/plan/apply</text>
+  <circle cx="192" cy="79" r="68" fill="rgba(255,78,168,0.18)" filter="url(#softGlow)"/>
+  <circle cx="1056" cy="43" r="54" fill="rgba(57,244,255,0.14)" filter="url(#softGlow)"/>
+
+  <polygon points="0,209 216,163 372,209" fill="rgba(8,8,22,0.7)"/>
+  <polygon points="264,209 504,137 696,209" fill="rgba(14,10,36,0.82)"/>
+  <polygon points="600,209 864,151 1128,209" fill="rgba(8,8,26,0.75)"/>
+
+  <rect x="0" y="209" width="1200" height="151" fill="rgba(7,2,20,0.72)"/>
+
+  <g stroke="url(#grid)" stroke-width="1" opacity="0.9">
+    <line x1="0" y1="217" x2="1200" y2="217"/><line x1="0" y1="235" x2="1200" y2="235"/><line x1="0" y1="253" x2="1200" y2="253"/><line x1="0" y1="271" x2="1200" y2="271"/><line x1="0" y1="289" x2="1200" y2="289"/><line x1="0" y1="307" x2="1200" y2="307"/><line x1="0" y1="325" x2="1200" y2="325"/><line x1="0" y1="343" x2="1200" y2="343"/>
+    <line x1="0" y1="209" x2="-570" y2="360"/><line x1="86" y1="209" x2="-402" y2="360"/><line x1="171" y1="209" x2="-237" y2="360"/><line x1="257" y1="209" x2="-69" y2="360"/><line x1="343" y1="209" x2="99" y2="360"/><line x1="429" y1="209" x2="267" y2="360"/><line x1="514" y1="209" x2="432" y2="360"/><line x1="600" y1="209" x2="600" y2="360"/><line x1="686" y1="209" x2="768" y2="360"/><line x1="771" y1="209" x2="933" y2="360"/><line x1="857" y1="209" x2="1101" y2="360"/><line x1="943" y1="209" x2="1269" y2="360"/><line x1="1029" y1="209" x2="1437" y2="360"/><line x1="1114" y1="209" x2="1602" y2="360"/><line x1="1200" y1="209" x2="1770" y2="360"/>
   </g>
 
-  <g transform="translate(586,86)">
-    <rect width="214" height="132" rx="12" fill="#7C2D12" stroke="#FB923C"/>
-    <text x="20" y="46" fill="#FFEDD5" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">3. Connect</text>
-    <text x="20" y="77" fill="#FED7AA" font-family="Consolas, monospace" font-size="14">.\scripts\get-credentials.ps1</text>
-    <text x="20" y="103" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="13">Fetch kubeconfig, test access</text>
-  </g>
+  <path d="M 86 348 C 94 249, 84 239, 98 255 L 108 348 Z" fill="rgba(8,8,22,0.92)"/>
+  <path d="M 98 249 C 52 227, 44 199, 94 225" stroke="#39f4ff" stroke-width="2" fill="none"/>
+  <path d="M 98 249 C 130 227, 146 203, 104 229" stroke="#39f4ff" stroke-width="2" fill="none"/>
+  <path d="M 98 249 C 66 241, 58 223, 94 235" stroke="#ff4ea8" stroke-width="2" fill="none"/>
 
-  <g transform="translate(852,86)">
-    <rect width="214" height="132" rx="12" fill="#4C1D95" stroke="#A78BFA"/>
-    <text x="20" y="46" fill="#EDE9FE" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">4. Workloads</text>
-    <text x="20" y="77" fill="#DDD6FE" font-family="Consolas, monospace" font-size="14">.\scripts\deploy-workloads.ps1</text>
-    <text x="20" y="103" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="13">Deploy sample manifests</text>
-  </g>
+  <path d="M 1080 350 C 1070 253, 1082 233, 1066 255 L 1056 350 Z" fill="rgba(8,8,22,0.92)"/>
+  <path d="M 1066 249 C 1022 233, 1010 201, 1062 227" stroke="#39f4ff" stroke-width="2" fill="none"/>
+  <path d="M 1066 249 C 1106 227, 1120 205, 1072 231" stroke="#39f4ff" stroke-width="2" fill="none"/>
+  <path d="M 1066 249 C 1092 241, 1102 225, 1072 235" stroke="#ff4ea8" stroke-width="2" fill="none"/>
 
-  <g transform="translate(1118,86)">
-    <rect width="228" height="132" rx="12" fill="#9A3412" stroke="#FDBA74"/>
-    <text x="20" y="46" fill="#FFF7ED" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">5. Operate / Destroy</text>
-    <text x="20" y="73" fill="#FFEDD5" font-family="Consolas, monospace" font-size="14">stop-lab.ps1 / start-lab.ps1</text>
-    <text x="20" y="96" fill="#FFEDD5" font-family="Consolas, monospace" font-size="14">cost-check.ps1 / destroy.ps1</text>
-    <text x="20" y="118" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="13">Day-2 control and cleanup</text>
-  </g>
+  <text x="44" y="86" font-family="'Orbitron','Segoe UI',sans-serif" font-size="56" font-weight="700" fill="#f7ddff">Deployment Flow</text>
+  <text x="46" y="126" font-family="'Space Grotesk','Segoe UI',sans-serif" font-size="21" fill="#d4c0ff">Scripted path from Terraform apply to workload rollout and runbook execution</text>
 
-  <line x1="268" y1="152" x2="320" y2="152" stroke="#CBD5E1" stroke-width="3" marker-end="url(#flowarrow)"/>
-  <line x1="534" y1="152" x2="586" y2="152" stroke="#CBD5E1" stroke-width="3" marker-end="url(#flowarrow)"/>
-  <line x1="800" y1="152" x2="852" y2="152" stroke="#CBD5E1" stroke-width="3" marker-end="url(#flowarrow)"/>
-  <line x1="1066" y1="152" x2="1118" y2="152" stroke="#CBD5E1" stroke-width="3" marker-end="url(#flowarrow)"/>
+  
+      <g transform="translate(46,306)">
+        <rect width="118" height="28" rx="14" fill="rgba(57,244,255,0.13)" stroke="rgba(57,244,255,0.55)"/>
+        <text x="59" y="19" text-anchor="middle" font-family="'IBM Plex Mono','Consolas',monospace" font-size="11" fill="#c7faff">deploy.ps1</text>
+      </g>
+      <g transform="translate(176,306)">
+        <rect width="142" height="28" rx="14" fill="rgba(57,244,255,0.13)" stroke="rgba(57,244,255,0.55)"/>
+        <text x="71" y="19" text-anchor="middle" font-family="'IBM Plex Mono','Consolas',monospace" font-size="11" fill="#c7faff">build-app.ps1</text>
+      </g>
+      <g transform="translate(330,306)">
+        <rect width="198" height="28" rx="14" fill="rgba(57,244,255,0.13)" stroke="rgba(57,244,255,0.55)"/>
+        <text x="99" y="19" text-anchor="middle" font-family="'IBM Plex Mono','Consolas',monospace" font-size="11" fill="#c7faff">deploy-workloads.ps1</text>
+      </g>
+
+  
+    <g transform="translate(774,28)">
+      <rect width="396" height="304" rx="14" fill="rgba(7,5,20,0.48)" stroke="rgba(165,111,255,0.52)"/>
+      <text x="20" y="30" font-family="'Orbitron','Segoe UI',sans-serif" font-size="12" letter-spacing="2" fill="#f9c8ff">EXECUTION ORDER</text>
+        <circle cx="20" cy="51" r="3" fill="#39f4ff"/>
+        <text x="31" y="56" font-family="'Space Grotesk','Segoe UI',sans-serif" font-size="13" fill="#f3dcff">1 bootstrap state and auth</text>
+        <circle cx="20" cy="75" r="3" fill="#39f4ff"/>
+        <text x="31" y="80" font-family="'Space Grotesk','Segoe UI',sans-serif" font-size="13" fill="#f3dcff">2 deploy infra by environment</text>
+        <circle cx="20" cy="99" r="3" fill="#39f4ff"/>
+        <text x="31" y="104" font-family="'Space Grotesk','Segoe UI',sans-serif" font-size="13" fill="#f3dcff">3 get credentials</text>
+        <circle cx="20" cy="123" r="3" fill="#39f4ff"/>
+        <text x="31" y="128" font-family="'Space Grotesk','Segoe UI',sans-serif" font-size="13" fill="#f3dcff">4 build and push learning-hub image</text>
+        <circle cx="20" cy="147" r="3" fill="#39f4ff"/>
+        <text x="31" y="152" font-family="'Space Grotesk','Segoe UI',sans-serif" font-size="13" fill="#f3dcff">5 deploy workloads with rendered tokens</text>
+        <circle cx="20" cy="171" r="3" fill="#39f4ff"/>
+        <text x="31" y="176" font-family="'Space Grotesk','Segoe UI',sans-serif" font-size="13" fill="#f3dcff">6 run modules and track completion</text>
+    </g>
+
+  <text x="44" y="344" font-family="'IBM Plex Mono','Consolas',monospace" font-size="11" fill="#b89ed8">End-to-end AKS lab lifecycle</text>
 </svg>

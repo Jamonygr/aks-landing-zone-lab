@@ -42,14 +42,14 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+# -- Helpers -----------------------------------------------------------------
 
 function Write-Info    { param([string]$Msg) Write-Host "[INFO]    $Msg" -ForegroundColor Cyan }
 function Write-Success { param([string]$Msg) Write-Host "[OK]      $Msg" -ForegroundColor Green }
 function Write-Warn    { param([string]$Msg) Write-Host "[WARN]    $Msg" -ForegroundColor Yellow }
 function Write-Err     { param([string]$Msg) Write-Host "[ERROR]   $Msg" -ForegroundColor Red }
 
-# ── Resolve paths ────────────────────────────────────────────────────────────
+# -- Resolve paths -----------------------------------------------------------
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $rootDir   = Split-Path -Parent $scriptDir
@@ -64,12 +64,12 @@ if (-not (Test-Path $ManifestRoot)) {
 }
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Yellow
-Write-Host "║          AKS Landing Zone Lab - Cleanup Workloads           ║" -ForegroundColor Yellow
-Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Yellow
+Write-Host "+------------------------------------------------------------+" -ForegroundColor Yellow
+Write-Host "|          AKS Landing Zone Lab - Cleanup Workloads         |" -ForegroundColor Yellow
+Write-Host "+------------------------------------------------------------+" -ForegroundColor Yellow
 Write-Host ""
 
-# ── Verify kubectl works ────────────────────────────────────────────────────
+# -- Verify kubectl works ----------------------------------------------------
 
 Write-Info "Verifying kubectl connection..."
 try {
@@ -83,7 +83,7 @@ try {
 }
 Write-Host ""
 
-# ── Confirm ──────────────────────────────────────────────────────────────────
+# -- Confirm -----------------------------------------------------------------
 
 if (-not $AutoApprove) {
     Write-Warn "This will delete all lab workloads from the cluster."
@@ -95,7 +95,7 @@ if (-not $AutoApprove) {
     Write-Host ""
 }
 
-# ── Define delete order (reverse of apply) ───────────────────────────────────
+# -- Define delete order (reverse of apply) ----------------------------------
 
 $deleteOrder = @(
     @{ Name = "Autoscaling"; Path = "autoscaling" }
@@ -129,7 +129,7 @@ foreach ($stage in $deleteOrder) {
         continue
     }
 
-    Write-Info "Deleting $($stage.Name) ($($yamlFiles.Count) file(s))..."
+    Write-Info "Deleting $($stage.Name) - $($yamlFiles.Count) files..."
 
     $stageSuccess = $true
     foreach ($file in $yamlFiles) {
@@ -159,11 +159,11 @@ foreach ($stage in $deleteOrder) {
     Write-Host ""
 }
 
-# ── Summary ──────────────────────────────────────────────────────────────────
+# -- Summary -----------------------------------------------------------------
 
-Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║          Workload Cleanup Summary                            ║" -ForegroundColor Green
-Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host "+------------------------------------------------------------+" -ForegroundColor Green
+Write-Host "|                 Workload Cleanup Summary                   |" -ForegroundColor Green
+Write-Host "+------------------------------------------------------------+" -ForegroundColor Green
 Write-Host ""
 
 foreach ($result in $results) {
@@ -175,7 +175,7 @@ foreach ($result in $results) {
     }
     Write-Host "  $($result.Stage.PadRight(14))" -NoNewline -ForegroundColor White
     Write-Host "$($result.Status.PadRight(10))" -NoNewline -ForegroundColor $statusColor
-    Write-Host "($($result.Files) files)" -ForegroundColor Gray
+    Write-Host ("(" + $result.Files + " files)") -ForegroundColor Gray
 }
 
 Write-Host ""
